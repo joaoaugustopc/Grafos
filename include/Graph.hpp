@@ -21,6 +21,7 @@ public:
     void print_graph();
     int get_number_of_nodes();
     int get_number_of_edges();
+    void busca_prof(size_t node_id, std::ofstream& output_file); 
 
     int conected(size_t node_id_1, size_t node_id_2);
 
@@ -33,6 +34,7 @@ private:
     Node  *_first;
     Node  *_last;
     Node*  find_node(size_t node_id);
+    void DFS(Node* node, size_t node_id, size_t parent, std::map<size_t, bool> &visited, std::ofstream& output_file);
 };
 
 #endif  //GRAPH_HPP

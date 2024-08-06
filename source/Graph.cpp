@@ -118,6 +118,7 @@ void Graph::add_node(size_t node_id, float weight)
 //Se não existir algum dos nós, ele cria o nó que não existe
 void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
 {
+
     if(find_node(node_id_2) == nullptr){
         add_node(node_id_2);
     }
@@ -216,4 +217,53 @@ int Graph::get_number_of_nodes()
 int Graph::get_number_of_edges()
 {
     return this->_number_of_edges;
+}
+
+ void Graph:: busca_prof(size_t node_id,std::ofstream& output_file)
+{
+    
+    output_file << "digraph G {" << std::endl;
+
+    std::map<size_t, bool> visited;
+    Node *node = this->_first;
+    while (node != nullptr){
+        visited[node->_id] = false;
+        node = node->_next_node;
+    }
+
+
+    DFS(find_node(node_id), node_id, -1, visited, output_file);
+
+    node = this->_first;
+
+    while (node != nullptr){
+        if (!visited[node->_id]){
+                DFS(node, node->_id,-1, visited, output_file);
+        }
+        node = node->_next_node;
+    }
+
+    output_file << "}" << std::endl;
+    
+    
+    output_file.close();    
+
+    return;
+}
+
+void Graph :: DFS(Node* node, size_t node_id, size_t parent, std::map<size_t, bool> &visited, std::ofstream& output_file)
+{
+
+    visited[node_id] = true;
+    Edge *edge = node->_first_edge;
+    while (edge != nullptr){
+        if (!visited[edge->_target_id]){
+            output_file << "      " << node_id << " -> " << edge->_target_id << " [label=\"" << edge->_weight << "\"];" << std::endl;
+            DFS(find_node(edge->_target_id), edge->_target_id, node_id, visited, output_file);
+        }
+        else if (edge->_target_id != parent){
+            output_file << "      " << node_id << " -> " << edge->_target_id << " [label=\"" << edge->_weight << "\" color=\"red\" style = dashed];" << std::endl;
+        }
+        edge = edge->_next_edge;
+    }
 }

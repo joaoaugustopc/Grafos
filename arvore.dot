@@ -1,0 +1,15 @@
+digraph G {
+      1 -> 2 [label="0"];
+      2 -> 4 [label="0"];
+      4 -> 8 [label="0"];
+      8 -> 5 [label="0"];
+      5 -> 2 [label="0" color="red" style = dashed];
+      8 -> 6 [label="0"];
+      6 -> 3 [label="0"];
+      3 -> 1 [label="0" color="red" style = dashed];
+      3 -> 7 [label="0"];
+      7 -> 8 [label="0" color="red" style = dashed];
+      8 -> 7 [label="0" color="red" style = dashed];
+      2 -> 5 [label="0" color="red" style = dashed];
+      1 -> 3 [label="0" color="red" style = dashed];
+}

@@ -8,5 +8,6 @@
 #include <iostream> /* implementações básicas da linguagem */
 #include <utility> /* implementações de alguns containers e operações de swap */
 #include <vector> /* implementação do container vector e suas operações */
+#include <map> /* implementação do container unordered_map */
 
 #endif  //DEFINES_HPP
