@@ -9,5 +9,7 @@
 #include <utility> /* implementações de alguns containers e operações de swap */
 #include <vector> /* implementação do container vector e suas operações */
 #include <map> /* implementação do container unordered_map */
+#include <set>
+#include <string.h>
 
 #endif  //DEFINES_HPP
