@@ -10,7 +10,7 @@ public:
     /*Assinatura dos métodos básicos para o funcionamento da classe*/
 
     Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool weighted_nodes);
-    Graph( bool directed, bool weighted_edges, bool weighted_nodes);
+    Graph(bool directed, bool weighted_edges, bool weighted_nodes);
     ~Graph();
 
     void remove_node(size_t node_id);
@@ -19,8 +19,8 @@ public:
     void add_edge(size_t node_id_1, size_t node_id_2, float weight = 0, bool reverse = false);
     void print_graph(std::ofstream& output_file);
     void print_graph();
-    int get_number_of_nodes();
-    int get_number_of_edges();
+    int  get_number_of_nodes();
+    int  get_number_of_edges();
     void busca_prof(size_t node_id, std::ofstream& output_file);
     void kruscal(std::vector<size_t> nodes_ids, std::ofstream& output_file);
 
@@ -34,11 +34,12 @@ private:
     bool   _weighted_nodes;
     Node  *_first;
     Node  *_last;
-    Node*  find_node(size_t node_id);
-    void DFS(Node* node, size_t node_id, size_t parent, std::map<size_t, bool> &visited, std::ofstream& output_file, std::set<std::pair<size_t, size_t>> &printed_edges);
-    void induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tuple<int, int, float>>& edges);
-    int search(std::map<int, int>& components, int i);
-    void Union(std::map<int, int>& components, int x, int y);
+    Node  *find_node(size_t node_id);
+    void   DFS(Node *node, size_t node_id, size_t parent, std::map<size_t, bool>& visited, std::ofstream& output_file,
+               std::set<std::pair<size_t, size_t>>& printed_edges);
+    void   induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tuple<int, int, float>>& edges);
+    int    search(std::map<int, int>& components, int i);
+    void   Union(std::map<int, int>& components, int x, int y);
 };
 
 #endif  //GRAPH_HPP

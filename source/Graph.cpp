@@ -384,14 +384,12 @@ void Graph ::DFS(Node *node, size_t node_id, size_t parent, std::map<size_t, boo
     }
 }
 
-void Graph :: kruscal(std::vector<size_t> nodes_ids, std::ofstream& output_file)
+void Graph ::kruscal(std::vector<size_t> nodes_ids, std::ofstream& output_file)
 {
-    Graph* subgraph = new Graph(this->_directed, this->_weighted_edges, this->_weighted_nodes);
+    Graph                                   *subgraph = new Graph(this->_directed, this->_weighted_edges, this->_weighted_nodes);
     std::vector<std::tuple<int, int, float>> edges;
     induced_subgraph(nodes_ids, edges);
-    std::sort(edges.begin(), edges.end(), [](std::tuple<int, int, float> a, std::tuple<int, int, float> b) {
-        return std::get<2>(a) < std::get<2>(b);
-    });
+    std::sort(edges.begin(), edges.end(), [](std::tuple<int, int, float> a, std::tuple<int, int, float> b) { return std::get<2>(a) < std::get<2>(b); });
 
     std::map<int, int> components;
 
@@ -400,39 +398,39 @@ void Graph :: kruscal(std::vector<size_t> nodes_ids, std::ofstream& output_file)
         components[i] = -1;
     }
 
-
-    for(int i = 0; i < edges.size(); i++){
+    for (int i = 0; i < edges.size(); i++)
+    {
         int x = search(components, std::get<0>(edges[i]));
         int y = search(components, std::get<1>(edges[i]));
 
-        if(x != y){
+        if (x != y)
+        {
             subgraph->add_edge(std::get<0>(edges[i]), std::get<1>(edges[i]), std::get<2>(edges[i]));
-            Union(components, x, y);   
+            Union(components, x, y);
         }
-
     }
-    
+
     subgraph->print_graph(output_file);
     delete subgraph;
 }
 
-void Graph :: induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tuple<int, int, float>>& edges)
-{ 
-    for(int i = 0; i < nodes_ids.size(); i++)
+void Graph ::induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tuple<int, int, float>>& edges)
+{
+    for (int i = 0; i < nodes_ids.size(); i++)
     {
         Node *node = this->_first;
-        while(node != nullptr)
+        while (node != nullptr)
         {
-            if(node->_id == nodes_ids[i])
+            if (node->_id == nodes_ids[i])
             {
                 Edge *edge = node->_first_edge;
-                while(edge != nullptr)
+                while (edge != nullptr)
                 {
-                    for(int j = 0; j < nodes_ids.size(); j++)
+                    for (int j = 0; j < nodes_ids.size(); j++)
                     {
-                        if(edge->_target_id == nodes_ids[j])
+                        if (edge->_target_id == nodes_ids[j])
                         {
-                            edges.push_back({node->_id, edge->_target_id, edge->_weight});
+                            edges.push_back({ node->_id, edge->_target_id, edge->_weight });
                         }
                     }
                     edge = edge->_next_edge;
@@ -442,27 +440,26 @@ void Graph :: induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::t
         }
     }
 
-    for(int i = 0; i < edges.size(); i++)
+    for (int i = 0; i < edges.size(); i++)
     {
         std::cout << std::get<0>(edges[i]) << " " << std::get<1>(edges[i]) << " " << std::get<2>(edges[i]) << std::endl;
     }
 
-    std::cout<<"ok" << std::endl;
-    
+    std::cout << "ok" << std::endl;
 }
 
-int Graph :: search(std::map<int, int>& components, int i)
+int Graph ::search(std::map<int, int>& components, int i)
 {
-    if(components[i] == -1)
+    if (components[i] == -1)
     {
         return i;
     }
     return search(components, components[i]);
 }
 
-void Graph :: Union(std::map<int, int>&components, int x, int y)
+void Graph ::Union(std::map<int, int>& components, int x, int y)
 {
-    int xset = search(components, x);
-    int yset = search(components, y);
+    int xset         = search(components, x);
+    int yset         = search(components, y);
     components[xset] = yset;
 }
