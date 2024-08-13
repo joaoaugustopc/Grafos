@@ -11,5 +11,6 @@
 #include <map> /* implementação do container unordered_map */
 #include <set>
 #include <string.h>
+#include <stack>
 
 #endif  //DEFINES_HPP

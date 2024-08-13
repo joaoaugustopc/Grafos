@@ -304,6 +304,8 @@ int Graph::get_number_of_edges()
     return this->_number_of_edges;
 }
 
+// To do : Organizar a função DFS, criar um vetor para armazenar a arvore. Criar a funcao que salva o arquivo;
+
 void Graph::busca_prof(size_t node_id, std::ofstream& output_file)
 {
     if (this->_directed)
@@ -326,6 +328,9 @@ void Graph::busca_prof(size_t node_id, std::ofstream& output_file)
     std::set<std::pair<size_t, size_t>> printed_edges;
     DFS(find_node(node_id), node_id, -1, visited, output_file, printed_edges);
 
+    // Devo fazer a busca a partir de todos os nós, caso o grafo não seja conexo ?
+    
+    /*
     node = this->_first;
 
     while (node != nullptr)
@@ -336,6 +341,7 @@ void Graph::busca_prof(size_t node_id, std::ofstream& output_file)
         }
         node = node->_next_node;
     }
+    */
 
     output_file << "}" << std::endl;
 
@@ -462,4 +468,36 @@ void Graph ::Union(std::map<int, int>& components, int x, int y)
     int xset         = search(components, x);
     int yset         = search(components, y);
     components[xset] = yset;
+}
+
+std::vector<size_t> Graph::transitive_closure(size_t node_id)
+{
+    std::vector<size_t> stack;
+    std::map<size_t, bool> visited;
+    Node *first_node = this->_first;
+    while (first_node != nullptr)
+    {
+        visited[first_node->_id] = false;
+        first_node = first_node->_next_node;
+    }
+
+    DFS_TC(node_id, visited, stack);
+
+    return stack;
+}
+
+void Graph ::DFS_TC(size_t node_id, std::map<size_t, bool>& visited, std::vector<size_t>& stack)
+{
+    visited[node_id] = true;
+    stack.push_back(node_id);
+    Node *node = find_node(node_id);
+    Edge *edge = node->_first_edge;
+    while (edge != nullptr)
+    {
+        if (!visited[edge->_target_id])
+        {
+            DFS_TC(edge->_target_id, visited, stack);
+        }
+        edge = edge->_next_edge;
+    }
 }

@@ -28,11 +28,18 @@ int main(int argc, char *argv[])
     std::cout << "Numero de noss do grafo: " << graph->get_number_of_nodes() << std::endl;
     std::cout << "Numero de arestas do grafo: " << graph->get_number_of_edges() << std::endl;
 
-    std::ofstream dotFile("output/dot/DFS.dot");
-    std::ofstream krscal("output/dot/krscal_6nU.dot");
+    //std::ofstream dotFile("output/dot/DFS.dot");
+   //std::ofstream krscal("output/dot/krscal_6nU.dot");
 
-    graph->busca_prof(1, dotFile);
-    graph->kruscal({ 1, 2, 3, 4, 5, 6 }, krscal);
+    //graph->busca_prof(1, dotFile);
+    //graph->kruscal({ 1, 2, 3, 4, 5, 6 }, krscal);
+    
+    std::vector<size_t> vetor = graph->transitive_closure(3);
+
+    for (size_t i = 0; i < vetor.size(); i++)
+    {
+        std::cout << vetor[i] << " ";
+    }
 
     delete graph;
 
