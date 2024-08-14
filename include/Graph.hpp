@@ -13,17 +13,17 @@ public:
     Graph(bool directed, bool weighted_edges, bool weighted_nodes);
     ~Graph();
 
-    void remove_node(size_t node_id);
-    void remove_edge(size_t node_id_1, size_t node_id_2);
-    void add_node(size_t node_id, float weight = 0);
-    void add_edge(size_t node_id_1, size_t node_id_2, float weight = 0, bool reverse = false);
-    void print_graph(std::ofstream& output_file);
-    void print_graph();
-    int  get_number_of_nodes();
-    int  get_number_of_edges();
-    void busca_prof(size_t node_id, std::ofstream& output_file);
-    void kruscal(std::vector<size_t> nodes_ids, std::ofstream& output_file);
-    int conected(size_t node_id_1, size_t node_id_2);
+    void                remove_node(size_t node_id);
+    void                remove_edge(size_t node_id_1, size_t node_id_2);
+    void                add_node(size_t node_id, float weight = 1);
+    void                add_edge(size_t node_id_1, size_t node_id_2, float weight = 1, bool reverse = false);
+    void                print_graph(std::ofstream& output_file);
+    void                print_graph();
+    int                 get_number_of_nodes();
+    int                 get_number_of_edges();
+    void                busca_prof(size_t node_id, std::ofstream& output_file);
+    Graph              *kruscal(std::vector<size_t> nodes_ids);
+    int                 conected(size_t node_id_1, size_t node_id_2);
     std::vector<size_t> transitive_closure(size_t node_id);
 
 private:
@@ -40,7 +40,7 @@ private:
     void   induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tuple<int, int, float>>& edges);
     int    search(std::map<int, int>& components, int i);
     void   Union(std::map<int, int>& components, int x, int y);
-    void  DFS_TC(size_t node_id, std::map<size_t, bool>& visited, std::vector<size_t>& stack);
+    void   DFS_TC(size_t node_id, std::map<size_t, bool>& visited, std::vector<size_t>& stack);
 };
 
 #endif  //GRAPH_HPP

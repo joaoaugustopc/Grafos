@@ -1,5 +1,7 @@
 #include "../include/Graph.hpp"
 
+// Tratar todos os caso de pesos nos nós;
+
 Graph::Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool weighted_nodes)
 {
     this->_number_of_nodes = 0;
@@ -26,7 +28,7 @@ Graph::Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool w
             std::stringstream ss(line);
             if (ss >> node1 >> node2)
             {
-                edges.push_back({ node1, node2, 0 });
+                edges.push_back({ node1, node2, 1 });
             }
         }
     }
@@ -192,6 +194,9 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool reve
     return;
 }
 
+// Qual format para imprimir no terminal ?
+
+// Imprimindo a lista de adjacencia
 void Graph::print_graph()
 {
     Node *node = this->_first;
@@ -216,13 +221,21 @@ void Graph::print_graph(std::ofstream& output_file)
     if (this->_directed)
     {
         output_file << "digraph G {" << std::endl;
+        output_file.flush();
         Node *node = this->_first;
         while (node != nullptr)
         {
             Edge *edge = node->_first_edge;
             while (edge != nullptr)
             {
-                output_file << "      " << node->_id << " -> " << edge->_target_id << " [label=\"" << edge->_weight << "\"];" << std::endl;
+                if (!this->_weighted_edges)
+                {
+                    output_file << "      " << node->_id << " -> " << edge->_target_id << ";" << std::endl;
+                }
+                else
+                {
+                    output_file << "      " << node->_id << " -> " << edge->_target_id << " [label=\"" << edge->_weight << "\"];" << std::endl;
+                }
                 edge = edge->_next_edge;
             }
             node = node->_next_node;
@@ -241,7 +254,15 @@ void Graph::print_graph(std::ofstream& output_file)
             {
                 if (printed_edges.find({ edge->_target_id, node->_id }) == printed_edges.end())
                 {
-                    output_file << "      " << node->_id << " -- " << edge->_target_id << " [label=\"" << edge->_weight << "\"];" << std::endl;
+                    if (!this->_weighted_edges)
+                    {
+                        output_file << "      " << node->_id << " -- " << edge->_target_id << ";" << std::endl;
+                    }
+                    else
+                    {
+                        output_file << "      " << node->_id << " -- " << edge->_target_id << " [label=\"" << edge->_weight << "\"];" << std::endl;
+                    }
+
                     printed_edges.insert({ node->_id, edge->_target_id });
                 }
                 else
@@ -254,6 +275,7 @@ void Graph::print_graph(std::ofstream& output_file)
         }
         output_file << "}" << std::endl;
     }
+
     return;
 }
 
@@ -329,7 +351,7 @@ void Graph::busca_prof(size_t node_id, std::ofstream& output_file)
     DFS(find_node(node_id), node_id, -1, visited, output_file, printed_edges);
 
     // Devo fazer a busca a partir de todos os nós, caso o grafo não seja conexo ?
-    
+
     /*
     node = this->_first;
 
@@ -390,7 +412,7 @@ void Graph ::DFS(Node *node, size_t node_id, size_t parent, std::map<size_t, boo
     }
 }
 
-void Graph ::kruscal(std::vector<size_t> nodes_ids, std::ofstream& output_file)
+Graph *Graph ::kruscal(std::vector<size_t> nodes_ids)
 {
     Graph                                   *subgraph = new Graph(this->_directed, this->_weighted_edges, this->_weighted_nodes);
     std::vector<std::tuple<int, int, float>> edges;
@@ -416,8 +438,7 @@ void Graph ::kruscal(std::vector<size_t> nodes_ids, std::ofstream& output_file)
         }
     }
 
-    subgraph->print_graph(output_file);
-    delete subgraph;
+    return subgraph;
 }
 
 void Graph ::induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tuple<int, int, float>>& edges)
@@ -446,12 +467,12 @@ void Graph ::induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tu
         }
     }
 
+    std::cout << "------- SUBGRAFO VERTICE INDUZIDO ------- " << std::endl;
+
     for (int i = 0; i < edges.size(); i++)
     {
         std::cout << std::get<0>(edges[i]) << " " << std::get<1>(edges[i]) << " " << std::get<2>(edges[i]) << std::endl;
     }
-
-    std::cout << "ok" << std::endl;
 }
 
 int Graph ::search(std::map<int, int>& components, int i)
@@ -472,13 +493,13 @@ void Graph ::Union(std::map<int, int>& components, int x, int y)
 
 std::vector<size_t> Graph::transitive_closure(size_t node_id)
 {
-    std::vector<size_t> stack;
+    std::vector<size_t>    stack;
     std::map<size_t, bool> visited;
-    Node *first_node = this->_first;
+    Node                  *first_node = this->_first;
     while (first_node != nullptr)
     {
         visited[first_node->_id] = false;
-        first_node = first_node->_next_node;
+        first_node               = first_node->_next_node;
     }
 
     DFS_TC(node_id, visited, stack);
