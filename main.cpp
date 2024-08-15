@@ -133,8 +133,27 @@ int main(int argc, char *argv[])
                 std::cin >> weight;
                 break;
             case 3:
+                std::cout << "Digite o id do vertice: ";
+
+                std::cin >> node_id;
+
+                std ::cout << "Numero de vertices do Grafo: " << graph->get_number_of_nodes() << std::endl;
+
+                std::cout << "Removendo vertice " << node_id << "..." << std::endl;
+                graph->remove_node(node_id);
+
+                std ::cout << "Numero de vertices do Grafo: " << graph->get_number_of_nodes() << std::endl;
+
                 break;
             case 4:
+                std::cout << "Digite o id do vertice de origem: ";
+                std::cin >> source_id;
+                std::cout << "Digite o id do vertice de destino: ";
+                std::cin >> target_id;
+                std ::cout << "Numero de arestas do Grafo: " << graph->get_number_of_edges() << std::endl;
+                graph->remove_edge(source_id, target_id);
+                std::cout << "Removendo aresta " << source_id << " -- " << target_id << "..." << std::endl;
+                std ::cout << "Numero de arestas do Grafo: " << graph->get_number_of_edges() << std::endl;
                 break;
             case 5:
             {

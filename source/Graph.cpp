@@ -91,10 +91,79 @@ Graph::~Graph()
 
 void Graph::remove_node(size_t node_position)
 {
+    Node *node = this->_first;
+    while (node != nullptr)
+    {
+        if (node->_id == node_position)
+        {
+            Node *previous_node = node->_previous_node;
+            Node *next_node     = node->_next_node;
+            if (previous_node != nullptr)
+            {
+                previous_node->_next_node = next_node;
+            }
+            else
+            {
+                this->_first = next_node;
+            }
+            if (next_node != nullptr)
+            {
+                next_node->_previous_node = previous_node;
+            }
+            else
+            {
+                this->_last = previous_node;
+            }
+            Edge *edge = node->_first_edge;
+            while (edge != nullptr)
+            {
+                Edge *next_edge = edge->_next_edge;
+                delete edge;
+                edge = next_edge;
+            }
+            delete node;
+            this->_number_of_nodes--;
+            return;
+        }
+        node = node->_next_node;
+    }
+    return;
 }
 
 void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
 {
+    Node *node = this->_first;
+    while (node != nullptr)
+    {
+        if (node->_id == node_position_1)
+        {
+            Edge *edge = node->_first_edge;
+            Edge *previous_edge = nullptr;
+            while (edge != nullptr)
+            {
+                if (edge->_target_id == node_position_2)
+                {
+                    if (previous_edge != nullptr)
+                    {
+                        previous_edge->_next_edge = edge->_next_edge;
+                    }
+                    else
+                    {
+                        node->_first_edge = edge->_next_edge;
+                    }
+                    delete edge;
+                    node->_number_of_edges--;
+                    this->_number_of_edges--;
+                    return;
+                }
+                previous_edge = edge;
+                edge = edge->_next_edge;
+            }
+            return;
+        }
+        node = node->_next_node;
+    }
+    return;
 }
 
 void Graph::add_node(size_t node_id, float weight)
