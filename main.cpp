@@ -1,5 +1,11 @@
 #include "source/Graph.cpp"
 
+void clear_screen()
+{
+    // Limpa a tela (funciona no Windows)
+    system("cls");
+}
+
 void print_line(char edge_char, char fill_char, int width)
 {
     std::cout << edge_char << std::string(width, fill_char) << edge_char << std::endl;
@@ -63,7 +69,6 @@ int print_menu()
 
 int main(int argc, char *argv[])
 {
-    print_menu();
     if (argc < 5)
     {
         std::cerr << "Uso: " << argv[0] << " <nome_da_instancia>" << std::endl;
@@ -71,12 +76,12 @@ int main(int argc, char *argv[])
     }
 
     std::ifstream input(argv[1]);
-    std::ofstream output(argv[2]);
+    std::ofstream output;
     bool          directed       = std::stoi(argv[3]);
     bool          weighted_edges = std::stoi(argv[4]);
     bool          weighted_nodes = std::stoi(argv[5]);
 
-    if (!input.is_open() || !output.is_open())
+    if (!input.is_open())
     {
         std::cerr << "Erro ao abrir um arquivo" << std::endl;
         return 1;
@@ -84,14 +89,15 @@ int main(int argc, char *argv[])
 
     Graph *graph = new Graph(input, directed, weighted_edges, weighted_nodes);
 
-    int                 choice = 0;
+    int                 choice;
     std::vector<size_t> nodes;
-    std::ofstream       kruscal("output_kruscal.dot");
-    std::ofstream       DFS("output_dfs.dot");
+    std::ofstream       kruscal;
+    std::ofstream       DFS;
     size_t              node_id;
     size_t              source_id, target_id;
     float               weight;
     Graph              *subgraph;
+    char                c = 'U';
 
     //problema: apenas escreve o grafo no arquivo quando mata o programa ou quando ica repetindo a opcao 5
 
@@ -132,6 +138,7 @@ int main(int argc, char *argv[])
                 break;
             case 5:
             {
+                output.open(argv[2]);
                 if (output.is_open())
                 {
                     graph->print_graph(output);
@@ -156,6 +163,14 @@ int main(int argc, char *argv[])
                 std::cout << std::endl;
                 break;
             case 7:
+                std::cout << "Digite o id do vertice: ";
+                std::cin >> node_id;
+                std::cout << "Fecho transitivo indireto do vertice " << node_id << ": ";
+                for (auto i : graph->transitive_indirect(node_id))
+                {
+                    std::cout << i << ", ";
+                }
+                std::cout << std::endl;
                 break;
             case 8:
                 break;
@@ -164,23 +179,50 @@ int main(int argc, char *argv[])
             case 10:
                 break;
             case 11:
-                std::cout << "Arvore Geradora Minima (Versao: Kruscal): ";
-                std::cout << "tamanho do conjunto X de vertices: ";
-                int tam;
-                std::cin >> tam;
-                for (size_t i = 0; i < tam; i++)
+                if (argv[3])
+                {
+                    c = 'D';
+                }
+                kruscal.open("output/dot/kruscal_" + std::to_string(graph->get_number_of_nodes()) + "n" + c + ".dot");
+                if (kruscal.is_open())
+                {
+                    std::cout << "Arvore Geradora Minima (Versao: Kruscal): ";
+                    std::cout << "tamanho do conjunto X de vertices: ";
+                    int tam;
+                    std::cin >> tam;
+                    for (size_t i = 0; i < tam; i++)
+                    {
+                        std::cout << "Digite o id do vertice: ";
+                        std::cin >> node_id;
+                        nodes.push_back(node_id);
+                    }
+                    subgraph = graph->kruscal(nodes);
+                    subgraph->print_graph(kruscal);
+
+                    delete subgraph;
+                }
+                else
+                {
+                    std::cerr << "Erro ao abrir o arquivo de saida" << std::endl;
+                }
+                kruscal.close();
+                break;
+            case 12:
+                if (argv[3])
+                {
+                    c = 'D';
+                }
+                DFS.open("output/dot/DFS_" + std::to_string(graph->get_number_of_nodes()) + "n" + c + ".dot");
+                if (DFS.is_open())
                 {
                     std::cout << "Digite o id do vertice: ";
                     std::cin >> node_id;
-                    nodes.push_back(node_id);
+                    graph->busca_prof(node_id, DFS);
                 }
-                subgraph = graph->kruscal(nodes);
-                subgraph->print_graph(kruscal);
-
-                delete subgraph;
-                break;
-            case 12:
-                graph->busca_prof(1, DFS);
+                else
+                {
+                    std::cerr << "Erro ao abrir o arquivo de saida" << std::endl;
+                }
                 break;
             case 13:
                 break;
@@ -190,6 +232,11 @@ int main(int argc, char *argv[])
                 std::cout << "Opcao invalida" << std::endl;
                 break;
         }
+
+        std::cout << "Pressione enter para continuar..." << std::endl;
+        std::cout << "> ";
+        std::cin.ignore();
+        std::cin.get();
     } while (choice != 0);
 
     delete graph;

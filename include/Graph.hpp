@@ -25,6 +25,7 @@ public:
     Graph              *kruscal(std::vector<size_t> nodes_ids);
     int                 conected(size_t node_id_1, size_t node_id_2);
     std::vector<size_t> transitive_closure(size_t node_id);
+    std::vector<size_t> transitive_indirect(size_t node_id);
 
 private:
     size_t _number_of_nodes;

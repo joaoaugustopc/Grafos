@@ -493,6 +493,12 @@ void Graph ::Union(std::map<int, int>& components, int x, int y)
 
 std::vector<size_t> Graph::transitive_closure(size_t node_id)
 {
+    if (!this->_directed)
+    {
+        std::cout << "O grafo não é direcionado" << std::endl;
+        return {};
+    }
+
     std::vector<size_t>    stack;
     std::map<size_t, bool> visited;
     Node                  *first_node = this->_first;
@@ -521,4 +527,34 @@ void Graph ::DFS_TC(size_t node_id, std::map<size_t, bool>& visited, std::vector
         }
         edge = edge->_next_edge;
     }
+}
+
+std::vector<size_t> Graph::transitive_indirect(size_t node_id)
+{
+    if (!this->_directed)
+    {
+        std::cout << "O grafo não é direcionado" << std::endl;
+        return {};
+    }
+
+    Graph *reverse_graph = new Graph(this->_directed, this->_weighted_edges, this->_weighted_nodes);
+
+    Node *node = this->_first;
+
+    while (node != nullptr)
+    {
+        Edge *edge = node->_first_edge;
+        while (edge != nullptr)
+        {
+            reverse_graph->add_edge(edge->_target_id, node->_id, edge->_weight);
+            edge = edge->_next_edge;
+        }
+        node = node->_next_node;
+    }
+
+    std::vector<size_t> vetor = reverse_graph->transitive_closure(node_id);
+
+    delete reverse_graph;
+
+    return vetor;
 }
