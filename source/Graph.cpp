@@ -12,52 +12,34 @@ Graph::Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool w
     this->_first           = nullptr;
     this->_last            = nullptr;
 
-    // Uma outra maneira seria criar todos os nós, com os respectivos labels e depois adicionar as arestas.
-    std::string nodes;
-    std::getline(instance, nodes);
-    int number_of_nodes = std::stoi(nodes);
+    size_t node_id_1, node_id_2;
 
-    std::string                              line;
-    std::vector<std::tuple<int, int, float>> edges;
+    float number_of_nodes;
+    instance >> number_of_nodes;
 
-    if (!weighted_edges)
+    for (int i = 0; i < number_of_nodes; i++)
     {
-        while (std::getline(instance, line))
-        {
-            int               node1, node2;
-            std::stringstream ss(line);
-            if (ss >> node1 >> node2)
-            {
-                edges.push_back({ node1, node2, 1 });
-            }
-        }
+        // adicionar um metodo para adicionar um nó com peso
+        this->add_node(i, 0);
     }
 
+    if (weighted_edges)
+    {
+        float edge_weight;
+        while (!instance.eof())
+        {
+            instance >> node_id_1 >> node_id_2 >> edge_weight;
+            this->add_edge(node_id_1, node_id_2, edge_weight);
+        }
+    }
     else
     {
-        while (std::getline(instance, line))
+        while (!instance.eof())
         {
-            int               node1, node2;
-            float             weight;
-            std::stringstream ss(line);
-            if (ss >> node1 >> node2 >> weight)
-            {
-                edges.push_back({ node1, node2, weight });
-            }
+            instance >> node_id_1 >> node_id_2;
+            this->add_edge(node_id_1, node_id_2, 0);
         }
     }
-
-    instance.close();
-
-    for (const auto& edge : edges)
-    {
-        int   node1, node2;
-        float weight;
-        std::tie(node1, node2, weight) = edge;
-        add_edge(node1, node2, weight);
-    }
-
-    return;
 }
 
 Graph::Graph(bool directed, bool weighted_edges, bool weighted_nodes)
@@ -137,7 +119,7 @@ void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
     {
         if (node->_id == node_position_1)
         {
-            Edge *edge = node->_first_edge;
+            Edge *edge          = node->_first_edge;
             Edge *previous_edge = nullptr;
             while (edge != nullptr)
             {
@@ -157,7 +139,7 @@ void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
                     return;
                 }
                 previous_edge = edge;
-                edge = edge->_next_edge;
+                edge          = edge->_next_edge;
             }
             return;
         }
