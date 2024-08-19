@@ -353,20 +353,6 @@ int Graph::conected(size_t node_id_1, size_t node_id_2)
     return -1;
 }
 
-Node *Graph::find_node(size_t node_id)
-{
-    Node *node = this->_first;
-    while (node != nullptr)
-    {
-        if (node->_id == node_id)
-        {
-            return node;
-        }
-        node = node->_next_node;
-    }
-    return nullptr;
-}
-
 int Graph::get_number_of_nodes()
 {
     return this->_number_of_nodes;
@@ -564,7 +550,7 @@ std::vector<size_t> Graph::transitive_closure(size_t node_id)
     return stack;
 }
 
-void Graph ::DFS_TC(size_t node_id, std::map<size_t, bool>& visited, std::vector<size_t>& stack)
+void Graph::DFS_TC(size_t node_id, std::map<size_t, bool>& visited, std::vector<size_t>& stack)
 {
     visited[node_id] = true;
     stack.push_back(node_id);
@@ -608,4 +594,38 @@ std::vector<size_t> Graph::transitive_indirect(size_t node_id)
     delete reverse_graph;
 
     return vetor;
+}
+
+Graph::create_node(size_t node_id, float weight)
+{
+    Node *node             = new Node;
+    node->_id              = node_id;
+    node->_weight          = weight;
+    node->_number_of_edges = 0;
+    node->_first_edge      = nullptr;
+    node->_next_node       = nullptr;
+    node->_previous_node   = nullptr;
+
+    return node;
+}
+
+Node *Graph::find_node(size_t node_id)
+{
+    Node *aux_node = this->_first;
+
+    while (aux_node != nullptr && aux_node->_id != node_id)
+        aux_node = aux_node->_next_node;
+
+    return aux_node;
+}
+
+Edge *Graph::create_edge(size_t target_id, float weight)
+{
+    Edge *edge = new Edge;
+
+    edge->_target_id = target_id;
+    edge->_weight    = weight;
+    edge->_next_edge = nullptr;
+
+    return edge;
 }
