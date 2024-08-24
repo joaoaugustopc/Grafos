@@ -17,31 +17,19 @@ Graph::Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool w
 
     float       number_of_nodes;
     std::string line;
-    float  edge_weight;
-
-    float       number_of_nodes;
-    std::string line;
 
     instance >> number_of_nodes;
 
     for (int i = 1; i <= number_of_nodes; i++)
-    for (int i = 1; i <= number_of_nodes; i++)
     {
         // adicionar um metodo para adicionar um nó com peso
-        this->add_node(i);
         this->add_node(i);
     }
 
     if (weighted_edges)
     {
         while (std::getline(instance, line))
-        while (std::getline(instance, line))
         {
-            std::stringstream ss(line);
-            if (ss >> node_id_1 >> node_id_2 >> edge_weight)
-            {
-                this->add_edge(node_id_1, node_id_2, edge_weight);
-            }
             std::stringstream ss(line);
             if (ss >> node_id_1 >> node_id_2 >> edge_weight)
             {
@@ -52,13 +40,7 @@ Graph::Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool w
     else
     {
         while (std::getline(instance, line))
-        while (std::getline(instance, line))
         {
-            std::stringstream ss(line);
-            if (ss >> node_id_1 >> node_id_2)
-            {
-                this->add_edge(node_id_1, node_id_2, 1);
-            }
             std::stringstream ss(line);
             if (ss >> node_id_1 >> node_id_2)
             {
