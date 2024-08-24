@@ -17,19 +17,31 @@ Graph::Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool w
 
     float       number_of_nodes;
     std::string line;
+    float  edge_weight;
+
+    float       number_of_nodes;
+    std::string line;
 
     instance >> number_of_nodes;
 
     for (int i = 1; i <= number_of_nodes; i++)
+    for (int i = 1; i <= number_of_nodes; i++)
     {
         // adicionar um metodo para adicionar um nó com peso
+        this->add_node(i);
         this->add_node(i);
     }
 
     if (weighted_edges)
     {
         while (std::getline(instance, line))
+        while (std::getline(instance, line))
         {
+            std::stringstream ss(line);
+            if (ss >> node_id_1 >> node_id_2 >> edge_weight)
+            {
+                this->add_edge(node_id_1, node_id_2, edge_weight);
+            }
             std::stringstream ss(line);
             if (ss >> node_id_1 >> node_id_2 >> edge_weight)
             {
@@ -40,7 +52,13 @@ Graph::Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool w
     else
     {
         while (std::getline(instance, line))
+        while (std::getline(instance, line))
         {
+            std::stringstream ss(line);
+            if (ss >> node_id_1 >> node_id_2)
+            {
+                this->add_edge(node_id_1, node_id_2, 1);
+            }
             std::stringstream ss(line);
             if (ss >> node_id_1 >> node_id_2)
             {
@@ -122,135 +140,105 @@ void Graph::remove_node(size_t node_position)
 
 void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
 {
-    Node *node = this->_first;
-    while (node != nullptr)
+    if (!this->conected(node_position_1, node_position_2))
+        return;
+
+    Node *node_1   = this->find_node(node_position_1);
+    Edge *aux_edge = node_1->_first_edge;
+
+    if (aux_edge->_target_id == node_position_2)
     {
-        if (node->_id == node_position_1)
+        node_1->_first_edge = aux_edge->_next_edge;
+        delete aux_edge;
+        if(!this->_directed)
         {
-            Edge *edge          = node->_first_edge;
-            Edge *previous_edge = nullptr;
-            while (edge != nullptr)
-            {
-                if (edge->_target_id == node_position_2)
-                {
-                    if (previous_edge != nullptr)
-                    {
-                        previous_edge->_next_edge = edge->_next_edge;
-                    }
-                    else
-                    {
-                        node->_first_edge = edge->_next_edge;
-                    }
-                    delete edge;
-                    node->_number_of_edges--;
-                    this->_number_of_edges--;
-                    return;
-                }
-                previous_edge = edge;
-                edge          = edge->_next_edge;
-            }
-            return;
+            this->remove_edge(node_position_2, node_position_1);
         }
-        node = node->_next_node;
+        node_1->_number_of_edges--;
+        this->_number_of_edges--;
+        return;
     }
-    return;
+
+    while (aux_edge->_next_edge->_target_id != node_position_2)
+        aux_edge = aux_edge->_next_edge;
+
+    Edge *aux_edge_2     = aux_edge->_next_edge;
+    aux_edge->_next_edge = aux_edge_2->_next_edge;
+    delete aux_edge_2;
+    if(!this->_directed)
+    {
+        this->remove_edge(node_position_2, node_position_1);
+    }
+    node_1->_number_of_edges--;
+    this->_number_of_edges--;
 }
 
 void Graph::add_node(size_t node_id, float weight)
 {
-    Node *new_node             = new Node;
-    new_node->_number_of_edges = 0;
-    new_node->_id              = node_id;
-    new_node->_weight          = weight;
-    new_node->_first_edge      = nullptr;
+    if (this->find_node(node_id) != nullptr)
+        return;
+    
+    Node *node = this->create_node(node_id, weight);
 
-    if (this->_number_of_nodes == 0)
+    if (this->_first == nullptr)
     {
-        this->_first             = new_node;
-        this->_last              = new_node;
-        new_node->_next_node     = nullptr;
-        new_node->_previous_node = nullptr;
-        this->_number_of_nodes++;
-        return;
-    }
-    else if (this->_number_of_nodes == 1)
-    {
-        this->_first->_next_node = new_node;
-        new_node->_previous_node = this->_first;
-        new_node->_next_node     = nullptr;
-        this->_last              = new_node;
-        this->_number_of_nodes++;
-        return;
+        this->_first = this->_last = node;
     }
     else
     {
-        this->_last->_next_node  = new_node;
-        new_node->_previous_node = this->_last;
-        new_node->_next_node     = nullptr;
-        this->_last              = new_node;
-        this->_number_of_nodes++;
-        return;
+        node->_previous_node    = this->_last;
+        this->_last->_next_node = node;
+        this->_last             = node;
     }
+
+    this->_number_of_nodes++;
 }
 
-//Se não existir algum dos nós, ele cria o nó que não existe
 void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool reverse)
-{
-    if (find_node(node_id_2) == nullptr)
+{   /*
+    if (this->conected(node_id_1, node_id_2))
+        return;
+    */
+
+    if(find_node(node_id_2) == nullptr)
     {
-        add_node(node_id_2);
+        this->add_node(node_id_2);
     }
 
-    Edge *new_edge = new Edge;
-    this->_number_of_edges++;
-    new_edge->_weight    = weight;
-    new_edge->_target_id = node_id_2;
-    new_edge->_next_edge = nullptr;
+    Edge *new_edge = this->create_edge(node_id_2, weight);
+    Node *node_1   = this->find_node(node_id_1);
 
-    Node *node = this->_first;
-    while (node != nullptr)
+    if(node_1 == nullptr)
     {
-        if (node->_id == node_id_1)
+        this->add_node(node_id_1);
+        node_1 = this->find_node(node_id_1);
+    }
+
+
+    Edge *aux_edge = node_1->_first_edge;
+
+    if (aux_edge == nullptr)
+    {
+        node_1->_first_edge = new_edge;
+        if(!this->_directed && !reverse)
         {
-            if (node->_first_edge == nullptr)
-            {
-                node->_first_edge = new_edge;
-                node->_number_of_edges++;
-                if (!this->_directed && !reverse)
-                {
-                    add_edge(node_id_2, node_id_1, weight, true);
-                }
-                return;
-            }
-            else
-            {
-                Edge *edge = node->_first_edge;
-                while (edge->_next_edge != nullptr)
-                {
-                    edge = edge->_next_edge;
-                }
-                edge->_next_edge = new_edge;
-                node->_number_of_edges++;
-                if (!this->_directed && !reverse)
-                {
-                    add_edge(node_id_2, node_id_1, weight, true);
-                }
-                return;
-            }
+            this->add_edge(node_id_2, node_id_1, weight, true);
         }
-        node = node->_next_node;
     }
-
-    add_node(node_id_1);
-    this->_last->_first_edge = new_edge;
-    this->_last->_number_of_edges++;
-
-    if (!this->_directed && !reverse)
+    else
     {
-        add_edge(node_id_2, node_id_1, weight, true);
+        while (aux_edge->_next_edge != nullptr)
+            aux_edge = aux_edge->_next_edge;
+
+        aux_edge->_next_edge = new_edge;
+        if(!this->_directed && !reverse)
+        {
+            this->add_edge(node_id_2, node_id_1, weight, true);
+        }
     }
 
-    return;
+    node_1->_number_of_edges++;
+    this->_number_of_edges++;
 }
 
 // Qual format para imprimir no terminal ?
@@ -339,27 +327,26 @@ void Graph::print_graph(std::ofstream& output_file)
     return;
 }
 
-int Graph::conected(size_t node_id_1, size_t node_id_2)
+bool Graph::conected(size_t node_id_1, size_t node_id_2)
 {
-    Node *node = this->_first;
-    while (node != nullptr)
+    Node *aux_node = find_node(node_id_1);
+
+    if (aux_node == nullptr)
     {
-        if (node->_id == node_id_1)
-        {
-            Edge *edge = node->_first_edge;
-            while (edge != nullptr)
-            {
-                if (edge->_target_id == node_id_2)
-                {
-                    return edge->_weight;
-                }
-                edge = edge->_next_edge;
-            }
-            return -1;
-        }
-        node = node->_next_node;
+        return false;
     }
-    return -1;
+
+    Edge *edge = aux_node->_first_edge;
+    while (edge != nullptr)
+    {
+        if (edge->_target_id == node_id_2)
+        {
+            return true;
+        }
+        edge = edge->_next_edge;
+    }
+
+    return false;
 }
 
 int Graph::get_number_of_nodes()
