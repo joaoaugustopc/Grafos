@@ -605,7 +605,7 @@ std::vector<size_t> Graph::transitive_indirect(size_t node_id)
     return vetor;
 }
 
-Graph::create_node(size_t node_id, float weight)
+Node* Graph::create_node(size_t node_id, float weight)
 {
     Node *node             = new Node;
     node->_id              = node_id;
