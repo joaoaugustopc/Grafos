@@ -13,31 +13,39 @@ Graph::Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool w
     this->_last            = nullptr;
 
     size_t node_id_1, node_id_2;
+    float  edge_weight;
 
-    float number_of_nodes;
+    float       number_of_nodes;
+    std::string line;
+
     instance >> number_of_nodes;
 
-    for (int i = 0; i < number_of_nodes; i++)
+    for (int i = 1; i <= number_of_nodes; i++)
     {
         // adicionar um metodo para adicionar um nó com peso
-        this->add_node(i, 0);
+        this->add_node(i);
     }
 
     if (weighted_edges)
     {
-        float edge_weight;
-        while (!instance.eof())
+        while (std::getline(instance, line))
         {
-            instance >> node_id_1 >> node_id_2 >> edge_weight;
-            this->add_edge(node_id_1, node_id_2, edge_weight);
+            std::stringstream ss(line);
+            if (ss >> node_id_1 >> node_id_2 >> edge_weight)
+            {
+                this->add_edge(node_id_1, node_id_2, edge_weight);
+            }
         }
     }
     else
     {
-        while (!instance.eof())
+        while (std::getline(instance, line))
         {
-            instance >> node_id_1 >> node_id_2;
-            this->add_edge(node_id_1, node_id_2, 0);
+            std::stringstream ss(line);
+            if (ss >> node_id_1 >> node_id_2)
+            {
+                this->add_edge(node_id_1, node_id_2, 1);
+            }
         }
     }
 }
@@ -124,6 +132,12 @@ void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
     {
         node_1->_first_edge = aux_edge->_next_edge;
         delete aux_edge;
+        if(!this->_directed)
+        {
+            this->remove_edge(node_position_2, node_position_1);
+        }
+        node_1->_number_of_edges--;
+        this->_number_of_edges--;
         return;
     }
 
@@ -133,10 +147,19 @@ void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
     Edge *aux_edge_2     = aux_edge->_next_edge;
     aux_edge->_next_edge = aux_edge_2->_next_edge;
     delete aux_edge_2;
+    if(!this->_directed)
+    {
+        this->remove_edge(node_position_2, node_position_1);
+    }
+    node_1->_number_of_edges--;
+    this->_number_of_edges--;
 }
 
 void Graph::add_node(size_t node_id, float weight)
 {
+    if (this->find_node(node_id) != nullptr)
+        return;
+    
     Node *node = this->create_node(node_id, weight);
 
     if (this->_first == nullptr)
@@ -153,18 +176,36 @@ void Graph::add_node(size_t node_id, float weight)
     this->_number_of_nodes++;
 }
 
-void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
-{
+void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool reverse)
+{   /*
     if (this->conected(node_id_1, node_id_2))
         return;
+    */
 
-    Node *node_1   = this->find_node(node_id_1);
+    if(find_node(node_id_2) == nullptr)
+    {
+        this->add_node(node_id_2);
+    }
+
     Edge *new_edge = this->create_edge(node_id_2, weight);
+    Node *node_1   = this->find_node(node_id_1);
+
+    if(node_1 == nullptr)
+    {
+        this->add_node(node_id_1);
+        node_1 = this->find_node(node_id_1);
+    }
+
+
     Edge *aux_edge = node_1->_first_edge;
 
     if (aux_edge == nullptr)
     {
         node_1->_first_edge = new_edge;
+        if(!this->_directed && !reverse)
+        {
+            this->add_edge(node_id_2, node_id_1, weight, true);
+        }
     }
     else
     {
@@ -172,6 +213,10 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
             aux_edge = aux_edge->_next_edge;
 
         aux_edge->_next_edge = new_edge;
+        if(!this->_directed && !reverse)
+        {
+            this->add_edge(node_id_2, node_id_1, weight, true);
+        }
     }
 
     node_1->_number_of_edges++;
@@ -263,27 +308,26 @@ void Graph::print_graph(std::ofstream& output_file)
     return;
 }
 
-int Graph::conected(size_t node_id_1, size_t node_id_2)
+bool Graph::conected(size_t node_id_1, size_t node_id_2)
 {
-    Node *node = this->_first;
-    while (node != nullptr)
+    Node *aux_node = find_node(node_id_1);
+
+    if (aux_node == nullptr)
     {
-        if (node->_id == node_id_1)
-        {
-            Edge *edge = node->_first_edge;
-            while (edge != nullptr)
-            {
-                if (edge->_target_id == node_id_2)
-                {
-                    return edge->_weight;
-                }
-                edge = edge->_next_edge;
-            }
-            return -1;
-        }
-        node = node->_next_node;
+        return false;
     }
-    return -1;
+
+    Edge *edge = aux_node->_first_edge;
+    while (edge != nullptr)
+    {
+        if (edge->_target_id == node_id_2)
+        {
+            return true;
+        }
+        edge = edge->_next_edge;
+    }
+
+    return false;
 }
 
 int Graph::get_number_of_nodes()
@@ -529,7 +573,7 @@ std::vector<size_t> Graph::transitive_indirect(size_t node_id)
     return vetor;
 }
 
-Graph::create_node(size_t node_id, float weight)
+Node *Graph::create_node(size_t node_id, float weight)
 {
     Node *node             = new Node;
     node->_id              = node_id;

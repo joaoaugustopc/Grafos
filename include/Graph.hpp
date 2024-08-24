@@ -23,7 +23,7 @@ public:
     int                 get_number_of_edges();
     void                busca_prof(size_t node_id, std::ofstream& output_file);
     Graph              *kruscal(std::vector<size_t> nodes_ids);
-    int                 conected(size_t node_id_1, size_t node_id_2);
+    bool                 conected(size_t node_id_1, size_t node_id_2);
     std::vector<size_t> transitive_closure(size_t node_id);
     std::vector<size_t> transitive_indirect(size_t node_id);
 
