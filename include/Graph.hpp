@@ -35,13 +35,16 @@ private:
     bool   _weighted_nodes;
     Node  *_first;
     Node  *_last;
-    Node  *find_node(size_t node_id);
     void   DFS(Node *node, size_t node_id, size_t parent, std::map<size_t, bool>& visited, std::ofstream& output_file,
                std::set<std::pair<size_t, size_t>>& printed_edges);
     void   induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tuple<int, int, float>>& edges);
     int    search(std::map<int, int>& components, int i);
     void   Union(std::map<int, int>& components, int x, int y);
     void   DFS_TC(size_t node_id, std::map<size_t, bool>& visited, std::vector<size_t>& stack);
+
+    Node *create_node(size_t node_id, float weight);
+    Node *find_node(size_t node_id);
+    Edge *create_edge(size_t target_id, float weight = 0);
 };
 
 #endif  //GRAPH_HPP
