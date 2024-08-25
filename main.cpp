@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
     float               weight;
     Graph              *subgraph;
     char                c = 'U';
+    std::vector<size_t> caminho;
 
     //problema: apenas escreve o grafo no arquivo quando mata o programa ou quando ica repetindo a opcao 5
 
@@ -194,6 +195,17 @@ int main(int argc, char *argv[])
             case 8:
                 break;
             case 9:
+                std::cout << "Digite o id do vertice de origem: ";
+                std::cin >> source_id;
+                std::cout << "Digite o id do vertice de destino: ";
+                std::cin >> target_id;
+                caminho = graph->floyd_warshall(source_id, target_id);
+                std::cout << "Caminho minimo entre " << source_id << " e " << target_id << ": ";
+                for (auto i : caminho)
+                {
+                    std::cout << i << ", ";
+                }
+                std::cout << std::endl;
                 break;
             case 10:
                 break;

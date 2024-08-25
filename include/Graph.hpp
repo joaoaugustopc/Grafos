@@ -26,6 +26,7 @@ public:
     bool                conected(size_t node_id_1, size_t node_id_2);
     std::vector<size_t> transitive_closure(size_t node_id);
     std::vector<size_t> transitive_indirect(size_t node_id);
+    std::vector<size_t> floyd_warshall(size_t node_id_1, size_t node_id_2);
 
 private:
     size_t _number_of_nodes;
@@ -43,11 +44,13 @@ private:
     void   Union(std::map<int, int>& components, int x, int y);
     void   DFS_TC(size_t node_id, std::map<size_t, bool>& visited, std::vector<size_t>& stack);
 
-    Node *create_node(size_t node_id, float weight);
-    Node *find_node(size_t node_id);
-    Edge *create_edge(size_t target_id, float weight = 0);
-    void vectorToDotFile(std::ofstream& output_file, std::vector<std::tuple<size_t, size_t, float>>* arvore = nullptr,
-                        std::vector<std::tuple<size_t, size_t, float>>* arestas_retorno = nullptr);
+    Node                           *create_node(size_t node_id, float weight);
+    Node                           *find_node(size_t node_id);
+    Edge                           *create_edge(size_t target_id, float weight = 0);
+    void                            vectorToDotFile(std::ofstream& output_file, std::vector<std::tuple<size_t, size_t, float>> *arvore = nullptr,
+                                                    std::vector<std::tuple<size_t, size_t, float>> *arestas_retorno = nullptr);
+    std::vector<std::vector<float>> create_matrix();
+    std::vector<std::vector<float>> create_path_matrix();
 };
 
 #endif  //GRAPH_HPP

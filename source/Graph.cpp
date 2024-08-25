@@ -340,7 +340,6 @@ int Graph::get_number_of_edges()
     return this->_number_of_edges;
 }
 
-
 void Graph::busca_prof(size_t node_id, std::ofstream& output_file)
 {
     std::map<size_t, bool> visited;
@@ -368,7 +367,7 @@ void Graph::busca_prof(size_t node_id, std::ofstream& output_file)
         }
         node = node->_next_node;
     }
-   
+
     vectorToDotFile(output_file, &arv, &retorno);
 
     output_file.close();
@@ -594,7 +593,7 @@ Edge *Graph::create_edge(size_t target_id, float weight)
 }
 
 void Graph ::vectorToDotFile(std::ofstream& output_file, std::vector<std::tuple<size_t, size_t, float>> *arvore,
-                            std::vector<std::tuple<size_t, size_t, float>> *arestas_retorno)
+                             std::vector<std::tuple<size_t, size_t, float>> *arestas_retorno)
 {
     if (this->_directed)
     {
@@ -604,9 +603,9 @@ void Graph ::vectorToDotFile(std::ofstream& output_file, std::vector<std::tuple<
         {
             output_file << "      " << std::get<0>(edge) << " -> " << std::get<1>(edge) << " [label=\"" << std::get<2>(edge) << "\"];" << std::endl;
         }
-
     }
-    else{
+    else
+    {
         output_file << "graph G {" << std::endl;
         for (auto edge : *arvore)
         {
@@ -614,18 +613,22 @@ void Graph ::vectorToDotFile(std::ofstream& output_file, std::vector<std::tuple<
         }
     }
 
-    if(arestas_retorno!=nullptr){
+    if (arestas_retorno != nullptr)
+    {
         if (this->_directed)
         {
             for (auto edge : *arestas_retorno)
             {
-                output_file << "      " << std::get<0>(edge) << " -> " << std::get<1>(edge) << " [label=\"" << std::get<2>(edge) << "\", color=\"red\" style = dashed];" << std::endl;
+                output_file << "      " << std::get<0>(edge) << " -> " << std::get<1>(edge) << " [label=\"" << std::get<2>(edge)
+                            << "\", color=\"red\" style = dashed];" << std::endl;
             }
         }
-        else{
+        else
+        {
             for (auto edge : *arestas_retorno)
             {
-                output_file << "      " << std::get<0>(edge) << " -- " << std::get<1>(edge) << " [label=\"" << std::get<2>(edge) << "\", color=\"red\" style = dashed];" << std::endl;
+                output_file << "      " << std::get<0>(edge) << " -- " << std::get<1>(edge) << " [label=\"" << std::get<2>(edge)
+                            << "\", color=\"red\" style = dashed];" << std::endl;
             }
         }
     }
@@ -633,4 +636,84 @@ void Graph ::vectorToDotFile(std::ofstream& output_file, std::vector<std::tuple<
     output_file << "}" << std::endl;
 
     return;
+}
+
+std::vector<size_t> Graph::floyd_warshall(size_t node_id_1, size_t node_id_2)
+{
+    std::vector<std::vector<float>> matrix      = create_matrix();
+    std::vector<std::vector<float>> path_matrix = create_path_matrix();
+    std::vector<size_t>             path;
+
+    for (int k = 0; k < this->_number_of_nodes; k++)
+    {
+        for (int i = 0; i < this->_number_of_nodes; i++)
+        {
+            for (int j = 0; j < this->_number_of_nodes; j++)
+            {
+                if (matrix[i][j] > matrix[i][k] + matrix[k][j])
+                {
+                    matrix[i][j]      = matrix[i][k] + matrix[k][j];
+                    path_matrix[i][j] = path_matrix[k][j];
+                }
+            }
+        }
+    }
+
+    int i = node_id_1 - 1;
+    int j = node_id_2 - 1;
+
+    if (matrix[i][j] == std::numeric_limits<float>::infinity())
+    {
+        return path;
+    }
+
+    while (i != j)
+    {
+        path.push_back(j + 1);
+        j = path_matrix[i][j];
+    }
+
+    path.push_back(i + 1);
+
+    std::reverse(path.begin(), path.end());
+    return path;
+}
+
+std::vector<std::vector<float>> Graph::create_matrix()
+{
+    std::vector<std::vector<float>> matrix(this->_number_of_nodes, std::vector<float>(this->_number_of_nodes, std::numeric_limits<float>::infinity()));
+
+    Node *node = this->_first;
+    while (node != nullptr)
+    {
+        Edge *edge = node->_first_edge;
+        while (edge != nullptr)
+        {
+            matrix[node->_id - 1][edge->_target_id - 1] = edge->_weight;
+            edge                                        = edge->_next_edge;
+        }
+        node = node->_next_node;
+    }
+
+    return matrix;
+}
+
+std::vector<std::vector<float>> Graph::create_path_matrix()
+{
+    std::vector<std::vector<float>> matrix(this->_number_of_nodes, std::vector<float>(this->_number_of_nodes));
+
+    Node *node = this->_first;
+    while (node != nullptr)
+    {
+        matrix[node->_id - 1][node->_id - 1] = -1;
+        Edge *edge                           = node->_first_edge;
+        while (edge != nullptr)
+        {
+            matrix[node->_id - 1][edge->_target_id - 1] = node->_id - 1;
+            edge                                        = edge->_next_edge;
+        }
+        node = node->_next_node;
+    }
+
+    return matrix;
 }
