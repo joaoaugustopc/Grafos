@@ -132,7 +132,7 @@ void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
     {
         node_1->_first_edge = aux_edge->_next_edge;
         delete aux_edge;
-        if(!this->_directed)
+        if (!this->_directed)
         {
             this->remove_edge(node_position_2, node_position_1);
         }
@@ -147,7 +147,7 @@ void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
     Edge *aux_edge_2     = aux_edge->_next_edge;
     aux_edge->_next_edge = aux_edge_2->_next_edge;
     delete aux_edge_2;
-    if(!this->_directed)
+    if (!this->_directed)
     {
         this->remove_edge(node_position_2, node_position_1);
     }
@@ -159,7 +159,7 @@ void Graph::add_node(size_t node_id, float weight)
 {
     if (this->find_node(node_id) != nullptr)
         return;
-    
+
     Node *node = this->create_node(node_id, weight);
 
     if (this->_first == nullptr)
@@ -177,12 +177,12 @@ void Graph::add_node(size_t node_id, float weight)
 }
 
 void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool reverse)
-{   /*
+{ /*
     if (this->conected(node_id_1, node_id_2))
         return;
     */
 
-    if(find_node(node_id_2) == nullptr)
+    if (find_node(node_id_2) == nullptr)
     {
         this->add_node(node_id_2);
     }
@@ -190,19 +190,18 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool reve
     Edge *new_edge = this->create_edge(node_id_2, weight);
     Node *node_1   = this->find_node(node_id_1);
 
-    if(node_1 == nullptr)
+    if (node_1 == nullptr)
     {
         this->add_node(node_id_1);
         node_1 = this->find_node(node_id_1);
     }
-
 
     Edge *aux_edge = node_1->_first_edge;
 
     if (aux_edge == nullptr)
     {
         node_1->_first_edge = new_edge;
-        if(!this->_directed && !reverse)
+        if (!this->_directed && !reverse)
         {
             this->add_edge(node_id_2, node_id_1, weight, true);
         }
@@ -213,7 +212,7 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool reve
             aux_edge = aux_edge->_next_edge;
 
         aux_edge->_next_edge = new_edge;
-        if(!this->_directed && !reverse)
+        if (!this->_directed && !reverse)
         {
             this->add_edge(node_id_2, node_id_1, weight, true);
         }
@@ -341,19 +340,9 @@ int Graph::get_number_of_edges()
     return this->_number_of_edges;
 }
 
-// To do : Organizar a função DFS, criar um vetor para armazenar a arvore. Criar a funcao que salva o arquivo;
 
 void Graph::busca_prof(size_t node_id, std::ofstream& output_file)
 {
-    if (this->_directed)
-    {
-        output_file << "digraph G {" << std::endl;
-    }
-    else
-    {
-        output_file << "graph G {" << std::endl;
-    }
-
     std::map<size_t, bool> visited;
     Node                  *node = this->_first;
     while (node != nullptr)
@@ -362,25 +351,25 @@ void Graph::busca_prof(size_t node_id, std::ofstream& output_file)
         node               = node->_next_node;
     }
 
-    std::set<std::pair<size_t, size_t>> printed_edges;
-    DFS(find_node(node_id), node_id, -1, visited, output_file, printed_edges);
+    std::set<std::pair<size_t, size_t>>            printed_return_edges;
+    std::vector<std::tuple<size_t, size_t, float>> arv;
+    std::vector<std::tuple<size_t, size_t, float>> retorno;
+    DFS(find_node(node_id), node_id, -1, visited, output_file, printed_return_edges, arv, retorno);
 
     // Devo fazer a busca a partir de todos os nós, caso o grafo não seja conexo ?
 
-    /*
     node = this->_first;
 
     while (node != nullptr)
     {
         if (!visited[node->_id])
         {
-            DFS(node, node->_id, -1, visited, output_file, printed_edges);
+            DFS(node, node->_id, -1, visited, output_file, printed_return_edges, arv, retorno);
         }
         node = node->_next_node;
     }
-    */
-
-    output_file << "}" << std::endl;
+   
+    vectorToDotFile(output_file, &arv, &retorno);
 
     output_file.close();
 
@@ -388,7 +377,8 @@ void Graph::busca_prof(size_t node_id, std::ofstream& output_file)
 }
 
 void Graph ::DFS(Node *node, size_t node_id, size_t parent, std::map<size_t, bool>& visited, std::ofstream& output_file,
-                 std::set<std::pair<size_t, size_t>>& printed_edges)
+                 std::set<std::pair<size_t, size_t>>& printed_return_edges, std::vector<std::tuple<size_t, size_t, float>>& arv,
+                 std::vector<std::tuple<size_t, size_t, float>>& retorno)
 {
     visited[node_id] = true;
     Edge *edge       = node->_first_edge;
@@ -396,30 +386,25 @@ void Graph ::DFS(Node *node, size_t node_id, size_t parent, std::map<size_t, boo
     {
         if (!visited[edge->_target_id])
         {
-            if (this->_directed)
-            {
-                output_file << "      " << node_id << " -> " << edge->_target_id << " [label=\"" << edge->_weight << "\"];" << std::endl;
-            }
-            else
-            {
-                output_file << "      " << node_id << " -- " << edge->_target_id << " [label=\"" << edge->_weight << "\"];" << std::endl;
-            }
-            DFS(find_node(edge->_target_id), edge->_target_id, node_id, visited, output_file, printed_edges);
+            arv.push_back({ node_id, edge->_target_id, edge->_weight });
+            DFS(find_node(edge->_target_id), edge->_target_id, node_id, visited, output_file, printed_return_edges, arv, retorno);
         }
         else if (edge->_target_id != parent)
         {
             if (this->_directed)
             {
-                output_file << "      " << node_id << " -> " << edge->_target_id << " [label=\"" << edge->_weight << "\" color=\"red\" style = dashed];"
-                            << std::endl;
+                retorno.push_back({ node_id, edge->_target_id, edge->_weight });
             }
             else
             {
-                if (printed_edges.find({ edge->_target_id, node_id }) == printed_edges.end())
+                if (printed_return_edges.find({ edge->_target_id, node_id }) == printed_return_edges.end())
                 {
-                    output_file << "      " << node_id << " -- " << edge->_target_id << " [label=\"" << edge->_weight << "\" color=\"red\" style = dashed];"
-                                << std::endl;
-                    printed_edges.insert({ node_id, edge->_target_id });
+                    retorno.push_back({ node_id, edge->_target_id, edge->_weight });
+                    printed_return_edges.insert({ node_id, edge->_target_id });
+                }
+                else
+                {
+                    printed_return_edges.erase({ edge->_target_id, node_id });
                 }
             }
         }
@@ -574,7 +559,7 @@ std::vector<size_t> Graph::transitive_indirect(size_t node_id)
     return vetor;
 }
 
-Node* Graph::create_node(size_t node_id, float weight)
+Node *Graph::create_node(size_t node_id, float weight)
 {
     Node *node             = new Node;
     node->_id              = node_id;
@@ -606,4 +591,46 @@ Edge *Graph::create_edge(size_t target_id, float weight)
     edge->_next_edge = nullptr;
 
     return edge;
+}
+
+void Graph ::vectorToDotFile(std::ofstream& output_file, std::vector<std::tuple<size_t, size_t, float>> *arvore,
+                            std::vector<std::tuple<size_t, size_t, float>> *arestas_retorno)
+{
+    if (this->_directed)
+    {
+        output_file << "digraph G {" << std::endl;
+        output_file.flush();
+        for (auto edge : *arvore)
+        {
+            output_file << "      " << std::get<0>(edge) << " -> " << std::get<1>(edge) << " [label=\"" << std::get<2>(edge) << "\"];" << std::endl;
+        }
+
+    }
+    else{
+        output_file << "graph G {" << std::endl;
+        for (auto edge : *arvore)
+        {
+            output_file << "      " << std::get<0>(edge) << " -- " << std::get<1>(edge) << " [label=\"" << std::get<2>(edge) << "\"];" << std::endl;
+        }
+    }
+
+    if(arestas_retorno!=nullptr){
+        if (this->_directed)
+        {
+            for (auto edge : *arestas_retorno)
+            {
+                output_file << "      " << std::get<0>(edge) << " -> " << std::get<1>(edge) << " [label=\"" << std::get<2>(edge) << "\", color=\"red\" style = dashed];" << std::endl;
+            }
+        }
+        else{
+            for (auto edge : *arestas_retorno)
+            {
+                output_file << "      " << std::get<0>(edge) << " -- " << std::get<1>(edge) << " [label=\"" << std::get<2>(edge) << "\", color=\"red\" style = dashed];" << std::endl;
+            }
+        }
+    }
+
+    output_file << "}" << std::endl;
+
+    return;
 }

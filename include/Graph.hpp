@@ -23,7 +23,7 @@ public:
     int                 get_number_of_edges();
     void                busca_prof(size_t node_id, std::ofstream& output_file);
     Graph              *kruscal(std::vector<size_t> nodes_ids);
-    bool                 conected(size_t node_id_1, size_t node_id_2);
+    bool                conected(size_t node_id_1, size_t node_id_2);
     std::vector<size_t> transitive_closure(size_t node_id);
     std::vector<size_t> transitive_indirect(size_t node_id);
 
@@ -36,7 +36,8 @@ private:
     Node  *_first;
     Node  *_last;
     void   DFS(Node *node, size_t node_id, size_t parent, std::map<size_t, bool>& visited, std::ofstream& output_file,
-               std::set<std::pair<size_t, size_t>>& printed_edges);
+               std::set<std::pair<size_t, size_t>>& printed_return_edges, std::vector<std::tuple<size_t, size_t, float>>& arv,
+               std::vector<std::tuple<size_t, size_t, float>>& retorno);
     void   induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tuple<int, int, float>>& edges);
     int    search(std::map<int, int>& components, int i);
     void   Union(std::map<int, int>& components, int x, int y);
@@ -45,6 +46,8 @@ private:
     Node *create_node(size_t node_id, float weight);
     Node *find_node(size_t node_id);
     Edge *create_edge(size_t target_id, float weight = 0);
+    void vectorToDotFile(std::ofstream& output_file, std::vector<std::tuple<size_t, size_t, float>>* arvore = nullptr,
+                        std::vector<std::tuple<size_t, size_t, float>>* arestas_retorno = nullptr);
 };
 
 #endif  //GRAPH_HPP

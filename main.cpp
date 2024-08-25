@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
             case 10:
                 break;
             case 11:
-                if (argv[3])
+                if (*argv[3] != '0')
                 {
                     c = 'D';
                 }
@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
                 kruscal.close();
                 break;
             case 12:
-                if (argv[3])
+                if (*argv[3] != '0')
                 {
                     c = 'D';
                 }
