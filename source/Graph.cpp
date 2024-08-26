@@ -686,7 +686,8 @@ std::vector<std::vector<float>> Graph::create_matrix()
     Node *node = this->_first;
     while (node != nullptr)
     {
-        Edge *edge = node->_first_edge;
+        matrix[node->_id - 1][node->_id - 1] = 0;
+        Edge *edge                           = node->_first_edge;
         while (edge != nullptr)
         {
             matrix[node->_id - 1][edge->_target_id - 1] = edge->_weight;
@@ -716,4 +717,98 @@ std::vector<std::vector<float>> Graph::create_path_matrix()
     }
 
     return matrix;
+}
+
+std::vector<std::vector<float>> Graph::distancias_minimas()
+{
+    std::vector<std::vector<float>> matrix = create_matrix();
+
+    for (int k = 0; k < this->_number_of_nodes; k++)
+    {
+        for (int i = 0; i < this->_number_of_nodes; i++)
+        {
+            for (int j = 0; j < this->_number_of_nodes; j++)
+            {
+                if (matrix[i][j] > matrix[i][k] + matrix[k][j])
+                {
+                    matrix[i][j] = matrix[i][k] + matrix[k][j];
+                }
+            }
+        }
+    }
+
+    return matrix;
+}
+
+std::vector<float> Graph::get_excentricidades()
+{
+    std::vector<std::vector<float>> matrix = distancias_minimas();
+    int                             n      = matrix.size();
+    std::vector<float>              excentricidades(n, 0);
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (i != j)
+            {
+                if (excentricidades[i] == 0)
+                {
+                    excentricidades[i] = matrix[i][j];
+                }
+                else
+                {
+                    excentricidades[i] = std::max(excentricidades[i], matrix[i][j]);
+                }
+            }
+        }
+    }
+
+    return excentricidades;
+}
+
+float Graph::get_diametro()
+{
+    std::vector<float> excentricidades = get_excentricidades();
+    return *std::max_element(excentricidades.begin(), excentricidades.end());
+}
+
+float Graph::get_raio()
+{
+    std::vector<float> excentricidades = get_excentricidades();
+    return *std::min_element(excentricidades.begin(), excentricidades.end());
+}
+
+std::vector<size_t> Graph::get_centro()
+{
+    std::vector<float>  excentricidades = get_excentricidades();
+    float               raio            = get_raio();
+    std::vector<size_t> centro;
+
+    for (int i = 0; i < excentricidades.size(); i++)
+    {
+        if (excentricidades[i] == raio)
+        {
+            centro.push_back(i + 1);
+        }
+    }
+
+    return centro;
+}
+
+std::vector<size_t> Graph::get_periferia()
+{
+    std::vector<float>  excentricidades = get_excentricidades();
+    float               diametro        = get_diametro();
+    std::vector<size_t> periferia;
+
+    for (int i = 0; i < excentricidades.size(); i++)
+    {
+        if (excentricidades[i] == diametro)
+        {
+            periferia.push_back(i + 1);
+        }
+    }
+
+    return periferia;
 }

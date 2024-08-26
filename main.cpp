@@ -99,6 +99,8 @@ int main(int argc, char *argv[])
     Graph              *subgraph;
     char                c = 'U';
     std::vector<size_t> caminho;
+    float               raio, diametro;
+    std::vector<size_t> centro, periferia;
 
     //problema: apenas escreve o grafo no arquivo quando mata o programa ou quando ica repetindo a opcao 5
 
@@ -256,6 +258,25 @@ int main(int argc, char *argv[])
                 }
                 break;
             case 13:
+                raio      = graph->get_raio();
+                diametro  = graph->get_diametro();
+                centro    = graph->get_centro();
+                periferia = graph->get_periferia();
+
+                std::cout << "Raio do grafo: " << raio << std::endl;
+                std::cout << "Diametro do grafo: " << diametro << std::endl;
+                std::cout << "Centro do grafo: ";
+                for (auto i : centro)
+                {
+                    std::cout << i << ", ";
+                }
+                std::cout << std::endl;
+                std::cout << "Periferia do grafo: ";
+                for (auto i : periferia)
+                {
+                    std::cout << i << ", ";
+                }
+                std::cout << std::endl;
                 break;
             case 14:
                 break;

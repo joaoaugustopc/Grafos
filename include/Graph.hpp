@@ -13,20 +13,26 @@ public:
     Graph(bool directed, bool weighted_edges, bool weighted_nodes);
     ~Graph();
 
-    void                remove_node(size_t node_id);
-    void                remove_edge(size_t node_id_1, size_t node_id_2);
-    void                add_node(size_t node_id, float weight = 1);
-    void                add_edge(size_t node_id_1, size_t node_id_2, float weight = 1, bool reverse = false);
-    void                print_graph(std::ofstream& output_file);
-    void                print_graph();
-    int                 get_number_of_nodes();
-    int                 get_number_of_edges();
-    void                busca_prof(size_t node_id, std::ofstream& output_file);
-    Graph              *kruscal(std::vector<size_t> nodes_ids);
-    bool                conected(size_t node_id_1, size_t node_id_2);
-    std::vector<size_t> transitive_closure(size_t node_id);
-    std::vector<size_t> transitive_indirect(size_t node_id);
-    std::vector<size_t> floyd_warshall(size_t node_id_1, size_t node_id_2);
+    void                            remove_node(size_t node_id);
+    void                            remove_edge(size_t node_id_1, size_t node_id_2);
+    void                            add_node(size_t node_id, float weight = 1);
+    void                            add_edge(size_t node_id_1, size_t node_id_2, float weight = 1, bool reverse = false);
+    void                            print_graph(std::ofstream& output_file);
+    void                            print_graph();
+    int                             get_number_of_nodes();
+    int                             get_number_of_edges();
+    void                            busca_prof(size_t node_id, std::ofstream& output_file);
+    Graph                          *kruscal(std::vector<size_t> nodes_ids);
+    bool                            conected(size_t node_id_1, size_t node_id_2);
+    std::vector<size_t>             transitive_closure(size_t node_id);
+    std::vector<size_t>             transitive_indirect(size_t node_id);
+    std::vector<size_t>             floyd_warshall(size_t node_id_1, size_t node_id_2);
+    std::vector<std::vector<float>> distancias_minimas();
+    std::vector<float>              get_excentricidades();
+    float                           get_diametro();
+    float                           get_raio();
+    std::vector<size_t>             get_centro();
+    std::vector<size_t>             get_periferia();
 
 private:
     size_t _number_of_nodes;
