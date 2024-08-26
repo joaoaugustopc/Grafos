@@ -3,6 +3,7 @@
 
 #include "Node.hpp"
 #include "defines.hpp"
+#include <sstream>
 
 class Graph
 {
