@@ -867,7 +867,7 @@ std::vector<size_t> Graph::get_periferia()
 }
 
 
-/*Graph* Graph::prim(size_t start_node_id) {
+Graph* Graph::prim(size_t start_node_id) {
     if (this->_first == nullptr) {
         return nullptr;
     }
@@ -918,4 +918,4 @@ std::vector<size_t> Graph::get_periferia()
     }
 
     return mst;
-}*/
+}
