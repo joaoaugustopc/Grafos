@@ -1,4 +1,6 @@
 #include "../include/Graph.hpp"
+#include <sstream>
+#include <limits>
 
 // Tratar todos os caso de pesos nos nós;
 
@@ -425,7 +427,7 @@ Graph *Graph ::kruscal(std::vector<size_t> nodes_ids)
         components[i] = -1;
     }
 
-    for (int i = 0; i < edges.size(); i++)
+    for (size_t i = 0; i < edges.size(); i++)
     {
         int x = search(components, std::get<0>(edges[i]));
         int y = search(components, std::get<1>(edges[i]));
@@ -442,7 +444,7 @@ Graph *Graph ::kruscal(std::vector<size_t> nodes_ids)
 
 void Graph ::induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tuple<int, int, float>>& edges)
 {
-    for (int i = 0; i < nodes_ids.size(); i++)
+    for (size_t i = 0; i < nodes_ids.size(); i++)
     {
         Node *node = this->_first;
         while (node != nullptr)
@@ -452,7 +454,7 @@ void Graph ::induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tu
                 Edge *edge = node->_first_edge;
                 while (edge != nullptr)
                 {
-                    for (int j = 0; j < nodes_ids.size(); j++)
+                    for (size_t j = 0; j < nodes_ids.size(); j++)
                     {
                         if (edge->_target_id == nodes_ids[j])
                         {
@@ -468,7 +470,7 @@ void Graph ::induced_subgraph(std::vector<size_t> nodes_ids, std::vector<std::tu
 
     std::cout << "------- SUBGRAFO VERTICE INDUZIDO ------- " << std::endl;
 
-    for (int i = 0; i < edges.size(); i++)
+    for (size_t i = 0; i < edges.size(); i++)
     {
         std::cout << std::get<0>(edges[i]) << " " << std::get<1>(edges[i]) << " " << std::get<2>(edges[i]) << std::endl;
     }
@@ -644,11 +646,11 @@ std::vector<size_t> Graph::floyd_warshall(size_t node_id_1, size_t node_id_2)
     std::vector<std::vector<float>> path_matrix = create_path_matrix();
     std::vector<size_t>             path;
 
-    for (int k = 0; k < this->_number_of_nodes; k++)
+    for (size_t k = 0; k < this->_number_of_nodes; k++)
     {
-        for (int i = 0; i < this->_number_of_nodes; i++)
+        for (size_t i = 0; i < this->_number_of_nodes; i++)
         {
-            for (int j = 0; j < this->_number_of_nodes; j++)
+            for (size_t j = 0; j < this->_number_of_nodes; j++)
             {
                 if (matrix[i][j] > matrix[i][k] + matrix[k][j])
                 {
@@ -723,11 +725,11 @@ std::vector<std::vector<float>> Graph::distancias_minimas()
 {
     std::vector<std::vector<float>> matrix = create_matrix();
 
-    for (int k = 0; k < this->_number_of_nodes; k++)
+    for (size_t k = 0; k < this->_number_of_nodes; k++)
     {
-        for (int i = 0; i < this->_number_of_nodes; i++)
+        for (size_t i = 0; i < this->_number_of_nodes; i++)
         {
-            for (int j = 0; j < this->_number_of_nodes; j++)
+            for (size_t j = 0; j < this->_number_of_nodes; j++)
             {
                 if (matrix[i][j] > matrix[i][k] + matrix[k][j])
                 {
@@ -785,7 +787,7 @@ std::vector<size_t> Graph::get_centro()
     float               raio            = get_raio();
     std::vector<size_t> centro;
 
-    for (int i = 0; i < excentricidades.size(); i++)
+    for (size_t i = 0; i < excentricidades.size(); i++)
     {
         if (excentricidades[i] == raio)
         {
@@ -802,7 +804,7 @@ std::vector<size_t> Graph::get_periferia()
     float               diametro        = get_diametro();
     std::vector<size_t> periferia;
 
-    for (int i = 0; i < excentricidades.size(); i++)
+    for (size_t i = 0; i < excentricidades.size(); i++)
     {
         if (excentricidades[i] == diametro)
         {

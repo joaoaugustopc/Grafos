@@ -1,4 +1,4 @@
-#include "source/Graph.cpp"
+#include "include/Graph.hpp"
 
 void clear_screen()
 {
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
                     std::cout << "tamanho do conjunto X de vertices: ";
                     int tam;
                     std::cin >> tam;
-                    for (size_t i = 0; i < tam; i++)
+                    for (int i = 0; i < tam; i++)
                     {
                         std::cout << "Digite o id do vertice: ";
                         std::cin >> node_id;
