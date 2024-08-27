@@ -34,6 +34,7 @@ public:
     float                           get_raio();
     std::vector<size_t>             get_centro();
     std::vector<size_t>             get_periferia();
+    Graph *prim(size_t start_node_id);
 
 private:
     size_t _number_of_nodes;

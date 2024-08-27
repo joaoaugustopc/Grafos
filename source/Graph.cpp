@@ -812,3 +812,57 @@ std::vector<size_t> Graph::get_periferia()
 
     return periferia;
 }
+
+
+Graph* Graph::prim(size_t start_node_id) {
+    if (this->_first == nullptr) {
+        return nullptr;
+    }
+
+    Graph* mst = new Graph(this->_directed, this->_weighted_edges, this->_weighted_nodes);
+
+    std::map<size_t, bool> visited;
+    Node* current = this->_first;
+    while (current != nullptr) {
+        visited[current->_id] = false;
+        current = current->_next_node;
+    }
+
+    std::priority_queue<std::tuple<float, size_t, size_t>,
+    std::vector<std::tuple<float, size_t, size_t>>,
+    std::greater<std::tuple<float, size_t, size_t>>> pq;
+
+    visited[start_node_id] = true;
+    Node* start_node = this->find_node(start_node_id);
+    Edge* edge = start_node->_first_edge;
+
+    while (edge != nullptr) {
+        pq.push(std::make_tuple(edge->_weight, start_node_id, edge->_target_id));
+        edge = edge->_next_edge;
+    }
+
+    while (!pq.empty()) {
+        auto [weight, from_node, to_node] = pq.top();
+        pq.pop();
+
+        if (visited[to_node]) {
+            continue;
+        }
+
+        visited[to_node] = true;
+
+        mst->add_edge(from_node, to_node, weight);
+
+        Node* next_node = this->find_node(to_node);
+        Edge* next_edge = next_node->_first_edge;
+
+        while (next_edge != nullptr) {
+            if (!visited[next_edge->_target_id]) {
+                pq.push(std::make_tuple(next_edge->_weight, to_node, next_edge->_target_id));
+            }
+            next_edge = next_edge->_next_edge;
+        }
+    }
+
+    return mst;
+}
