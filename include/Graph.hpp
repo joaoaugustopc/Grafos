@@ -3,6 +3,7 @@
 
 #include "Node.hpp"
 #include "defines.hpp"
+#include <sstream>
 
 class Graph
 {
@@ -22,11 +23,13 @@ public:
     int                             get_number_of_nodes();
     int                             get_number_of_edges();
     void                            busca_prof(size_t node_id, std::ofstream& output_file);
-    Graph                          *kruscal(std::vector<size_t> nodes_ids);
     bool                            conected(size_t node_id_1, size_t node_id_2);
     std::vector<size_t>             transitive_closure(size_t node_id);
     std::vector<size_t>             transitive_indirect(size_t node_id);
+    std::vector<size_t>             edsger_dijkstra(size_t node_id_1, size_t node_id_2);
     std::vector<size_t>             floyd_warshall(size_t node_id_1, size_t node_id_2);
+    Graph                           *prim(size_t start_node_id);
+    Graph                           *kruscal(std::vector<size_t> nodes_ids);
     std::vector<std::vector<float>> distancias_minimas();
     std::vector<float>              get_excentricidades();
     float                           get_diametro();

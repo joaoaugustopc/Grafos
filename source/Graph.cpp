@@ -640,6 +640,46 @@ void Graph ::vectorToDotFile(std::ofstream& output_file, std::vector<std::tuple<
     return;
 }
 
+std::vector<std::vector<float>> Graph::create_matrix()
+{
+    std::vector<std::vector<float>> matrix(this->_number_of_nodes, std::vector<float>(this->_number_of_nodes, std::numeric_limits<float>::infinity()));
+
+    Node *node = this->_first;
+    while (node != nullptr)
+    {
+        matrix[node->_id - 1][node->_id - 1] = 0;
+        Edge *edge                           = node->_first_edge;
+        while (edge != nullptr)
+        {
+            matrix[node->_id - 1][edge->_target_id - 1] = edge->_weight;
+            edge                                        = edge->_next_edge;
+        }
+        node = node->_next_node;
+    }
+
+    return matrix;
+}
+
+std::vector<std::vector<float>> Graph::create_path_matrix()
+{
+    std::vector<std::vector<float>> matrix(this->_number_of_nodes, std::vector<float>(this->_number_of_nodes));
+
+    Node *node = this->_first;
+    while (node != nullptr)
+    {
+        matrix[node->_id - 1][node->_id - 1] = -1;
+        Edge *edge                           = node->_first_edge;
+        while (edge != nullptr)
+        {
+            matrix[node->_id - 1][edge->_target_id - 1] = node->_id - 1;
+            edge                                        = edge->_next_edge;
+        }
+        node = node->_next_node;
+    }
+
+    return matrix;
+}
+
 std::vector<size_t> Graph::floyd_warshall(size_t node_id_1, size_t node_id_2)
 {
     std::vector<std::vector<float>> matrix      = create_matrix();
@@ -681,44 +721,57 @@ std::vector<size_t> Graph::floyd_warshall(size_t node_id_1, size_t node_id_2)
     return path;
 }
 
-std::vector<std::vector<float>> Graph::create_matrix()
+std::vector<size_t> Graph::edsger_dijkstra(size_t node_id_1, size_t node_id_2)
 {
-    std::vector<std::vector<float>> matrix(this->_number_of_nodes, std::vector<float>(this->_number_of_nodes, std::numeric_limits<float>::infinity()));
+    std::vector<float> distancias(this->_number_of_nodes, std::numeric_limits<float>::infinity());
+    std::vector<size_t> anteriores(this->_number_of_nodes, -1);
+    std::priority_queue<std::pair<float, size_t>, std::vector<std::pair<float, size_t>>, std::greater<>> prioridade;
+    std::vector<size_t> path;
 
-    Node *node = this->_first;
-    while (node != nullptr)
+    distancias[node_id_1 - 1] = 0;
+    prioridade.push({0, node_id_1 - 1});
+
+    while (!prioridade.empty())
     {
-        matrix[node->_id - 1][node->_id - 1] = 0;
-        Edge *edge                           = node->_first_edge;
-        while (edge != nullptr)
+        float dist_atual = prioridade.top().first;
+        size_t no_atual = prioridade.top().second;
+        prioridade.pop();
+
+        Node* current_node = find_node(no_atual + 1);
+
+        for (Edge* edge = current_node->_first_edge; edge != nullptr; edge = edge->_next_edge)
         {
-            matrix[node->_id - 1][edge->_target_id - 1] = edge->_weight;
-            edge                                        = edge->_next_edge;
+            size_t vizinho = edge->_target_id - 1;
+            float peso = edge->_weight;
+            float distancia = dist_atual + peso;
+
+            if (distancia < distancias[vizinho])
+            {
+                distancias[vizinho] = distancia;
+                anteriores[vizinho] = no_atual;
+                prioridade.push({distancia, vizinho});
+            }
         }
-        node = node->_next_node;
     }
 
-    return matrix;
-}
+    int i = node_id_1 - 1;
+    int j = node_id_2 - 1;
 
-std::vector<std::vector<float>> Graph::create_path_matrix()
-{
-    std::vector<std::vector<float>> matrix(this->_number_of_nodes, std::vector<float>(this->_number_of_nodes));
-
-    Node *node = this->_first;
-    while (node != nullptr)
+    if (distancias[j] == std::numeric_limits<float>::infinity())
     {
-        matrix[node->_id - 1][node->_id - 1] = -1;
-        Edge *edge                           = node->_first_edge;
-        while (edge != nullptr)
-        {
-            matrix[node->_id - 1][edge->_target_id - 1] = node->_id - 1;
-            edge                                        = edge->_next_edge;
-        }
-        node = node->_next_node;
+        return path;
     }
 
-    return matrix;
+    while (j != i)
+    {
+        path.push_back(j + 1);
+        j = anteriores[j];
+    }
+
+    path.push_back(i + 1);
+
+    std::reverse(path.begin(), path.end());
+    return path;
 }
 
 std::vector<std::vector<float>> Graph::distancias_minimas()
@@ -813,4 +866,58 @@ std::vector<size_t> Graph::get_periferia()
     }
 
     return periferia;
+}
+
+
+Graph* Graph::prim(size_t start_node_id) {
+    if (this->_first == nullptr) {
+        return nullptr;
+    }
+
+    Graph* mst = new Graph(this->_directed, this->_weighted_edges, this->_weighted_nodes);
+
+    std::map<size_t, bool> visited;
+    Node* current = this->_first;
+    while (current != nullptr) {
+        visited[current->_id] = false;
+        current = current->_next_node;
+    }
+
+    std::priority_queue<std::tuple<float, size_t, size_t>,
+    std::vector<std::tuple<float, size_t, size_t>>,
+    std::greater<std::tuple<float, size_t, size_t>>> pq;
+
+    visited[start_node_id] = true;
+    Node* start_node = this->find_node(start_node_id);
+    Edge* edge = start_node->_first_edge;
+
+    while (edge != nullptr) {
+        pq.push(std::make_tuple(edge->_weight, start_node_id, edge->_target_id));
+        edge = edge->_next_edge;
+    }
+
+    while (!pq.empty()) {
+        auto [weight, from_node, to_node] = pq.top();
+        pq.pop();
+
+        if (visited[to_node]) {
+            continue;
+        }
+
+        visited[to_node] = true;
+
+        mst->add_edge(from_node, to_node, weight);
+
+        Node* next_node = this->find_node(to_node);
+        Edge* next_edge = next_node->_first_edge;
+
+        while (next_edge != nullptr) {
+            if (!visited[next_edge->_target_id]) {
+                pq.push(std::make_tuple(next_edge->_weight, to_node, next_edge->_target_id));
+            }
+            next_edge = next_edge->_next_edge;
+        }
+    }
+
+    return mst;
 }

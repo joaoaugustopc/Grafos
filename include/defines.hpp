@@ -12,5 +12,8 @@
 #include <set>
 #include <string.h>
 #include <stack>
+#include <queue>
+#include <tuple>
+#include <limits>
 
 #endif  //DEFINES_HPP

@@ -2,7 +2,7 @@
 
 void clear_screen()
 {
-    // Limpa a tela (funciona no Windows)
+    // Limpa a tela
     system("cls");
 }
 
@@ -48,8 +48,8 @@ int print_menu()
     print_centered_text("4. Remover aresta;", width);
     print_centered_text("5. Exibir grafo;", width);
     print_centered_text("6. Fecho transitivo direto de um vertice;", width);
-    print_centered_text("7. Fecho transitovo indireto de um vertice;", width);
-    print_centered_text("8. Caminho minimo entre dois vertices. (versao: Djkstra);", width);
+    print_centered_text("7. Fecho transitivo indireto de um vertice;", width);
+    print_centered_text("8. Caminho minimo entre dois vertices. (versao: Dijkstra);", width);
     print_centered_text("9. Caminho minimo entre dois vertices. (Versao: Floyd);", width);
     print_centered_text("10. Arvore Geradora Minima. (Versao: Prim);", width);
     print_centered_text("11. Arvore Geradora Minima. (Versao: Kruscal);", width);
@@ -195,6 +195,24 @@ int main(int argc, char *argv[])
                 std::cout << std::endl;
                 break;
             case 8:
+                std::cout << "Digite o id do vertice de origem: ";
+                std::cin >> source_id;
+                std::cout << "Digite o id do vertice de destino: ";
+                std::cin >> target_id;
+                caminho = graph->edsger_dijkstra(source_id, target_id);
+                if (caminho.empty())
+                {
+                    std::cout << "Não há caminho entre " << source_id << " e " << target_id << "." << std::endl;
+                } else {
+                    std::cout << "Caminho mínimo entre " << source_id << " e " << target_id << ": ";
+                    for (size_t i = 0; i < caminho.size(); ++i) {
+                        std::cout << caminho[i];
+                        if (i < caminho.size() - 1) {
+                            std::cout << " -> ";
+                        }
+                    }
+                    std::cout << std::endl;
+                }
                 break;
             case 9:
                 std::cout << "Digite o id do vertice de origem: ";
