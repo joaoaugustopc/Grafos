@@ -721,23 +721,56 @@ std::vector<size_t> Graph::floyd_warshall(size_t node_id_1, size_t node_id_2)
 
 std::vector<size_t> Graph::edsger_dijkstra(size_t node_id_1, size_t node_id_2)
 {
-    std::vector<std::vector<float>> matrix      = create_matrix();
-    std::vector<std::vector<float>> path_matrix = create_path_matrix();
-    std::vector<size_t>             path;
-    
+    std::vector<float> distancias(this->_number_of_nodes, std::numeric_limits<float>::infinity());
+    std::vector<size_t> anteriores(this->_number_of_nodes, -1);
+    std::priority_queue<std::pair<float, size_t>, std::vector<std::pair<float, size_t>>, std::greater<>> prioridade;
+    std::vector<size_t> path;
+
+    distancias[node_id_1 - 1] = 0;
+    prioridade.push({0, node_id_1 - 1});
+
+    while (!prioridade.empty())
+    {
+        float dist_atual = prioridade.top().first;
+        size_t no_atual = prioridade.top().second;
+        prioridade.pop();
+
+        Node* current_node = find_node(no_atual + 1);
+
+        for (Edge* edge = current_node->_first_edge; edge != nullptr; edge = edge->_next_edge)
+        {
+            size_t vizinho = edge->_target_id - 1;
+            float peso = edge->_weight;
+            float distancia = dist_atual + peso;
+
+            if (distancia < distancias[vizinho])
+            {
+                distancias[vizinho] = distancia;
+                anteriores[vizinho] = no_atual;
+                prioridade.push({distancia, vizinho});
+            }
+        }
+    }
+
     int i = node_id_1 - 1;
     int j = node_id_2 - 1;
 
-    if (matrix[i][j] == std::numeric_limits<float>::infinity())
+    if (distancias[j] == std::numeric_limits<float>::infinity())
     {
         return path;
     }
 
-    // algortimo
+    while (j != i)
+    {
+        path.push_back(j + 1);
+        j = anteriores[j];
+    }
 
+    path.push_back(i + 1);
+
+    std::reverse(path.begin(), path.end());
     return path;
 }
-
 
 std::vector<std::vector<float>> Graph::distancias_minimas()
 {
@@ -834,7 +867,7 @@ std::vector<size_t> Graph::get_periferia()
 }
 
 
-Graph* Graph::prim(size_t start_node_id) {
+/*Graph* Graph::prim(size_t start_node_id) {
     if (this->_first == nullptr) {
         return nullptr;
     }
@@ -885,4 +918,4 @@ Graph* Graph::prim(size_t start_node_id) {
     }
 
     return mst;
-}
+}*/

@@ -199,8 +199,20 @@ int main(int argc, char *argv[])
                 std::cin >> source_id;
                 std::cout << "Digite o id do vertice de destino: ";
                 std::cin >> target_id;
-                caminho = graph->floyd_warshall(source_id, target_id);
-                std::cout << "Caminho minimo entre " << source_id << " e " << target_id << ": ";
+                caminho = graph->edsger_dijkstra(source_id, target_id);
+                if (caminho.empty())
+                {
+                    std::cout << "Não há caminho entre " << source_id << " e " << target_id << "." << std::endl;
+                } else {
+                    std::cout << "Caminho mínimo entre " << source_id << " e " << target_id << ": ";
+                    for (size_t i = 0; i < caminho.size(); ++i) {
+                        std::cout << caminho[i];
+                        if (i < caminho.size() - 1) {
+                            std::cout << " -> ";
+                        }
+                    }
+                    std::cout << std::endl;
+                }
                 break;
             case 9:
                 std::cout << "Digite o id do vertice de origem: ";

@@ -6,10 +6,10 @@ Este repositório contém a implementação dos algoritmos estudados na discipli
 Seguimos o padrão solicitado pela professora da Disciplina DCC059 - Teoria dos Grafos,
 compilando com o g++ e, executando com os arquivos de entrada, saída e pesos. Como exemplo:
 
-Compilação: g++ main.exe main.cpp source/Graph.cpp
-Execução: ./main.exe main.cpp output.txt 0 1 1
+Compilação: g++ *.cpp -o main
+Execução: ./main instance.dat output.txt 0 1 1
 
-0 1 1 são os pesos das arestas e podem (na verdade devem) ser ajustados.
+0 1 1 referem-se à ponderação das arestas e vértices.
 
 # Bugs:
 
