@@ -638,6 +638,46 @@ void Graph ::vectorToDotFile(std::ofstream& output_file, std::vector<std::tuple<
     return;
 }
 
+std::vector<std::vector<float>> Graph::create_matrix()
+{
+    std::vector<std::vector<float>> matrix(this->_number_of_nodes, std::vector<float>(this->_number_of_nodes, std::numeric_limits<float>::infinity()));
+
+    Node *node = this->_first;
+    while (node != nullptr)
+    {
+        matrix[node->_id - 1][node->_id - 1] = 0;
+        Edge *edge                           = node->_first_edge;
+        while (edge != nullptr)
+        {
+            matrix[node->_id - 1][edge->_target_id - 1] = edge->_weight;
+            edge                                        = edge->_next_edge;
+        }
+        node = node->_next_node;
+    }
+
+    return matrix;
+}
+
+std::vector<std::vector<float>> Graph::create_path_matrix()
+{
+    std::vector<std::vector<float>> matrix(this->_number_of_nodes, std::vector<float>(this->_number_of_nodes));
+
+    Node *node = this->_first;
+    while (node != nullptr)
+    {
+        matrix[node->_id - 1][node->_id - 1] = -1;
+        Edge *edge                           = node->_first_edge;
+        while (edge != nullptr)
+        {
+            matrix[node->_id - 1][edge->_target_id - 1] = node->_id - 1;
+            edge                                        = edge->_next_edge;
+        }
+        node = node->_next_node;
+    }
+
+    return matrix;
+}
+
 std::vector<size_t> Graph::floyd_warshall(size_t node_id_1, size_t node_id_2)
 {
     std::vector<std::vector<float>> matrix      = create_matrix();
@@ -679,45 +719,25 @@ std::vector<size_t> Graph::floyd_warshall(size_t node_id_1, size_t node_id_2)
     return path;
 }
 
-std::vector<std::vector<float>> Graph::create_matrix()
+std::vector<size_t> Graph::edsger_dijkstra(size_t node_id_1, size_t node_id_2)
 {
-    std::vector<std::vector<float>> matrix(this->_number_of_nodes, std::vector<float>(this->_number_of_nodes, std::numeric_limits<float>::infinity()));
+    std::vector<std::vector<float>> matrix      = create_matrix();
+    std::vector<std::vector<float>> path_matrix = create_path_matrix();
+    std::vector<size_t>             path;
+    
+    int i = node_id_1 - 1;
+    int j = node_id_2 - 1;
 
-    Node *node = this->_first;
-    while (node != nullptr)
+    if (matrix[i][j] == std::numeric_limits<float>::infinity())
     {
-        matrix[node->_id - 1][node->_id - 1] = 0;
-        Edge *edge                           = node->_first_edge;
-        while (edge != nullptr)
-        {
-            matrix[node->_id - 1][edge->_target_id - 1] = edge->_weight;
-            edge                                        = edge->_next_edge;
-        }
-        node = node->_next_node;
+        return path;
     }
 
-    return matrix;
+    // algortimo
+
+    return path;
 }
 
-std::vector<std::vector<float>> Graph::create_path_matrix()
-{
-    std::vector<std::vector<float>> matrix(this->_number_of_nodes, std::vector<float>(this->_number_of_nodes));
-
-    Node *node = this->_first;
-    while (node != nullptr)
-    {
-        matrix[node->_id - 1][node->_id - 1] = -1;
-        Edge *edge                           = node->_first_edge;
-        while (edge != nullptr)
-        {
-            matrix[node->_id - 1][edge->_target_id - 1] = node->_id - 1;
-            edge                                        = edge->_next_edge;
-        }
-        node = node->_next_node;
-    }
-
-    return matrix;
-}
 
 std::vector<std::vector<float>> Graph::distancias_minimas()
 {

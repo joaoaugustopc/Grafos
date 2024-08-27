@@ -28,6 +28,7 @@ public:
     std::vector<size_t>             transitive_closure(size_t node_id);
     std::vector<size_t>             transitive_indirect(size_t node_id);
     std::vector<size_t>             floyd_warshall(size_t node_id_1, size_t node_id_2);
+    std::vector<size_t>             edsger_dijkstra(size_t node_id_1, size_t node_id_2);
     std::vector<std::vector<float>> distancias_minimas();
     std::vector<float>              get_excentricidades();
     float                           get_diametro();
