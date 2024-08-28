@@ -721,56 +721,50 @@ std::vector<size_t> Graph::floyd_warshall(size_t node_id_1, size_t node_id_2)
     return path;
 }
 
-std::vector<size_t> Graph::edsger_dijkstra(size_t node_id_1, size_t node_id_2)
-{
-    std::vector<float> distancias(this->_number_of_nodes, std::numeric_limits<float>::infinity());
-    std::vector<size_t> anteriores(this->_number_of_nodes, -1);
-    std::priority_queue<std::pair<float, size_t>, std::vector<std::pair<float, size_t>>, std::greater<>> prioridade;
+std::vector<size_t> Graph::edsger_dijkstra(size_t node_id_1, size_t node_id_2) {
+    std::map<size_t, float> dist;
+    std::map<size_t, size_t> previous;
     std::vector<size_t> path;
 
-    distancias[node_id_1 - 1] = 0;
-    prioridade.push({0, node_id_1 - 1});
+    std::priority_queue<std::pair<float, size_t>, std::vector<std::pair<float, size_t>>, std::greater<>> queue;
 
-    while (!prioridade.empty())
-    {
-        float dist_atual = prioridade.top().first;
-        size_t no_atual = prioridade.top().second;
-        prioridade.pop();
+    for (Node* node = _first; node != nullptr; node = node->_next_node) {
+        dist[node->_id] = std::numeric_limits<float>::infinity();
+        previous[node->_id] = -1;
+    }
+    dist[node_id_1] = 0;
+    queue.push({0, node_id_1});
 
-        Node* current_node = find_node(no_atual + 1);
+    while (!queue.empty()) {
+        size_t u = queue.top().second;
+        queue.pop();
 
-        for (Edge* edge = current_node->_first_edge; edge != nullptr; edge = edge->_next_edge)
-        {
-            size_t vizinho = edge->_target_id - 1;
-            float peso = edge->_weight;
-            float distancia = dist_atual + peso;
+        if (u == node_id_2) {
+            break;
+        }
 
-            if (distancia < distancias[vizinho])
-            {
-                distancias[vizinho] = distancia;
-                anteriores[vizinho] = no_atual;
-                prioridade.push({distancia, vizinho});
+        Node* current_node = find_node(u);
+        for (Edge* edge = current_node->_first_edge; edge != nullptr; edge = edge->_next_edge) {
+            size_t v = edge->_target_id;
+            float alt = dist[u] + edge->_weight;
+
+            if (alt < dist[v]) {
+                dist[v] = alt;
+                previous[v] = u;
+                queue.push({alt, v});
             }
         }
     }
 
-    int i = node_id_1 - 1;
-    int j = node_id_2 - 1;
-
-    if (distancias[j] == std::numeric_limits<float>::infinity())
-    {
-        return path;
+    for (size_t at = node_id_2; at != (size_t)-1; at = previous[at]) {
+        path.push_back(at);
     }
-
-    while (j != i)
-    {
-        path.push_back(j + 1);
-        j = anteriores[j];
-    }
-
-    path.push_back(i + 1);
-
     std::reverse(path.begin(), path.end());
+
+    if (path.size() == 1 && path[0] != node_id_1) {
+        path.clear();
+    }
+
     return path;
 }
 

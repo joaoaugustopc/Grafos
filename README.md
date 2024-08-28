@@ -7,10 +7,18 @@ Seguimos o padrão solicitado pela professora da Disciplina DCC059 - Teoria dos 
 compilando com o g++ e, executando com os arquivos de entrada, saída e pesos. Como exemplo:
 
 Compilação: g++ *.cpp -o main
-Execução: ./main instance.dat output.txt 0 1 1
+Execução: ./main instances_example/5nD_2 output.txt 0 1 1
 
-0 1 1 referem-se à ponderação das arestas e vértices.
+0 indica que o grafo é não direcionado.
+1 indica que o grafo é ponderado nas arestas.
+1 indica que o grafo é ponderado nos vértices.
+
+- É claro que 5nD_2 é uma escolha arbitrária e, você pode (assim como deve) escolher o arquivo de interesse que esteja dentro de "instances_example".
+
+Após compilar e rodar, bem como quando realizar qualquer mudança no grafo original, recomendamos que exiba o grafo (opção 5).
 
 # Bugs:
 
-Escreve o grafo no arquivo quando mata o programa ou quando fica repetindo a opcao 5 (Exibir grafo);
+1- Escreve o grafo no arquivo somente quando mata o programa ou quando seleciona a opcao 5 (Exibir grafo). Por isso, recomendamos que, ao compilar e rodar e aparecer o menu, aperte a opção 5 (exibir grafo) antes de fazer qualquer coisa. Caso haja modificações no grafo (inserção, remoção ou demais mudanças), recomendamos a utilização da opção 5 novamente.
+
+2- 
