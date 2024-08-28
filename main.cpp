@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     float               raio, diametro;
     std::vector<size_t> centro, periferia;
 
-    //problema: apenas escreve o grafo no arquivo quando mata o programa ou quando ica repetindo a opcao 5
+    //problema: apenas escreve o grafo no arquivo de saída quando mata o programa ou pressiona a opcao 5 (exibir grafo).
 
     do
     {
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
                     graph->print_graph(output);
                     output << std::endl;
                     std::cout << "Grafo impresso no arquivo de saida" << std::endl;
-                    output.close();  // Fecha o arquivo após a escrita
+                    output.close();
                 }
                 else
                 {
@@ -314,6 +314,15 @@ int main(int argc, char *argv[])
     output.close();
     return 0;
 }
+
+
+
+
+
+
+
+
+
 
 /*
     graph->print_graph(output);

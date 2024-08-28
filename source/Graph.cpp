@@ -719,59 +719,10 @@ std::vector<size_t> Graph::floyd_warshall(size_t node_id_1, size_t node_id_2)
     return path;
 }
 
-/*std::vector<size_t> Graph::edsger_dijkstra(size_t node_id_1, size_t node_id_2) {
-    std::map<size_t, float> dist;
-    std::map<size_t, size_t> previous;
-    std::vector<size_t> path;
-
-    std::priority_queue<std::pair<float, size_t>, std::vector<std::pair<float, size_t>>, std::greater<>> queue;
-
-    for (Node* node = _first; node != nullptr; node = node->_next_node) {
-        dist[node->_id] = std::numeric_limits<float>::infinity();
-        previous[node->_id] = -1;
-    }
-    dist[node_id_1] = 0;
-    queue.push({0, node_id_1});
-
-    while (!queue.empty()) {
-        size_t u = queue.top().second;
-        queue.pop();
-
-        if (u == node_id_2) {
-            break;
-        }
-
-        Node* current_node = find_node(u);
-        for (Edge* edge = current_node->_first_edge; edge != nullptr; edge = edge->_next_edge) {
-            size_t v = edge->_target_id;
-            float alt = dist[u] + edge->_weight;
-
-            if (alt < dist[v]) {
-                dist[v] = alt;
-                previous[v] = u;
-                queue.push({alt, v});
-            }
-        }
-    }
-
-    for (size_t at = node_id_2; at != (size_t)-1; at = previous[at]) {
-        path.push_back(at);
-    }
-    std::reverse(path.begin(), path.end());
-
-    if (path.size() == 1 && path[0] != node_id_1) {
-        path.clear();
-    }
-
-    return path;
-}*/
-
 std::vector<size_t> Graph::edsger_dijkstra(size_t node_id_1, size_t node_id_2) {
     std::map<size_t, float> dist;
     std::map<size_t, size_t> previous;
     std::vector<size_t> path;
-
-    // Correção: especificando o tipo de comparação corretamente no template da priority_queue
     std::priority_queue<std::pair<float, size_t>, std::vector<std::pair<float, size_t>>, std::greater<std::pair<float, size_t>>> queue;
 
     for (Node* node = _first; node != nullptr; node = node->_next_node) {
