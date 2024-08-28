@@ -15,5 +15,6 @@
 #include <queue>
 #include <tuple>
 #include <limits>
+#include <sstream>
 
 #endif  //DEFINES_HPP

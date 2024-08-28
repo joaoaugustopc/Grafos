@@ -1,6 +1,4 @@
 #include "../include/Graph.hpp"
-#include <sstream>
-#include <limits>
 
 // Tratar todos os caso de pesos nos nós;
 
