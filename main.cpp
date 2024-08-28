@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
                 std::cin >> node_id;
                 graph->add_node(node_id);
                 break;
+                
             case 2:
                 std::cout << "Digite o id do vertice de origem: ";
                 std::cin >> source_id;
@@ -135,6 +136,7 @@ int main(int argc, char *argv[])
                 std::cout << "Digite o peso da aresta: ";
                 std::cin >> weight;
                 break;
+
             case 3:
                 std::cout << "Digite o id do vertice: ";
 
@@ -148,6 +150,7 @@ int main(int argc, char *argv[])
                 std ::cout << "Numero de vertices do Grafo: " << graph->get_number_of_nodes() << std::endl;
 
                 break;
+
             case 4:
                 std::cout << "Digite o id do vertice de origem: ";
                 std::cin >> source_id;
@@ -158,8 +161,8 @@ int main(int argc, char *argv[])
                 std::cout << "Removendo aresta " << source_id << " -- " << target_id << "..." << std::endl;
                 std ::cout << "Numero de arestas do Grafo: " << graph->get_number_of_edges() << std::endl;
                 break;
+
             case 5:
-            {
                 output.open(argv[2]);
                 if (output.is_open())
                 {
@@ -172,8 +175,8 @@ int main(int argc, char *argv[])
                 {
                     std::cerr << "Erro ao abrir o arquivo de saida" << std::endl;
                 }
-            }
-            break;
+                break;
+
             case 6:
                 std::cout << "Digite o id do vertice: ";
                 std::cin >> node_id;
@@ -184,6 +187,7 @@ int main(int argc, char *argv[])
                 }
                 std::cout << std::endl;
                 break;
+
             case 7:
                 std::cout << "Digite o id do vertice: ";
                 std::cin >> node_id;
@@ -194,6 +198,7 @@ int main(int argc, char *argv[])
                 }
                 std::cout << std::endl;
                 break;
+
             case 8:
                 std::cout << "Digite o id do vertice de origem: ";
                 std::cin >> source_id;
@@ -214,6 +219,7 @@ int main(int argc, char *argv[])
                     std::cout << std::endl;
                 }
                 break;
+
             case 9:
                 std::cout << "Digite o id do vertice de origem: ";
                 std::cin >> source_id;
@@ -227,8 +233,22 @@ int main(int argc, char *argv[])
                 }
                 std::cout << std::endl;
                 break;
+
             case 10:
+                std::cout << "Digite o id do vertice de origem para o algoritmo de Prim: ";
+                std::cin >> source_id;
+
+                subgraph = graph->prim(source_id);
+
+                if (subgraph->get_number_of_edges() == 0) {
+                    std::cout << "Nao foi possivel gerar a arvore geradora minima a partir do vertice " << source_id << "." << std::endl;
+                } else {
+                    std::cout << "Arvore Geradora Minima (Versao: Prim):" << std::endl;
+                    subgraph->print_graph();
+                }
+                delete subgraph;
                 break;
+
             case 11:
                 if (*argv[3] != '0')
                 {
