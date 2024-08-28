@@ -2,7 +2,6 @@
 
 void clear_screen()
 {
-    // Limpa a tela
     system("cls");
 }
 
@@ -67,6 +66,21 @@ int print_menu()
     return op;
 }
 
+void saveGraphToFile(Graph *graph, const std::string& filename)
+{
+    std::ofstream outputFile(filename);
+    if (outputFile.is_open())
+    {
+        graph->print_graph(outputFile);
+        outputFile.close();
+        std::cout << "Grafo salvo em " << filename << std::endl;
+    }
+    else
+    {
+        std::cerr << "Erro ao abrir o arquivo " << filename << std::endl;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 5)
@@ -102,8 +116,6 @@ int main(int argc, char *argv[])
     float               raio, diametro;
     std::vector<size_t> centro, periferia;
 
-    //problema: apenas escreve o grafo no arquivo de saída quando mata o programa ou pressiona a opcao 5 (exibir grafo).
-
     do
     {
         choice = print_menu();
@@ -115,6 +127,9 @@ int main(int argc, char *argv[])
                 std::cout << "Digite o id do vertice: ";
                 std::cin >> node_id;
                 graph->add_node(node_id);
+
+                saveGraphToFile(graph, argv[2]);
+
                 break;
                 
             case 2:
@@ -133,8 +148,8 @@ int main(int argc, char *argv[])
                     graph->add_edge(source_id, target_id);
                 }
 
-                std::cout << "Digite o peso da aresta: ";
-                std::cin >> weight;
+                saveGraphToFile(graph, argv[2]);
+
                 break;
 
             case 3:
@@ -149,6 +164,8 @@ int main(int argc, char *argv[])
 
                 std ::cout << "Numero de vertices do Grafo: " << graph->get_number_of_nodes() << std::endl;
 
+                saveGraphToFile(graph, argv[2]);
+
                 break;
 
             case 4:
@@ -160,21 +177,13 @@ int main(int argc, char *argv[])
                 graph->remove_edge(source_id, target_id);
                 std::cout << "Removendo aresta " << source_id << " -- " << target_id << "..." << std::endl;
                 std ::cout << "Numero de arestas do Grafo: " << graph->get_number_of_edges() << std::endl;
+
+                saveGraphToFile(graph, argv[2]);
+
                 break;
 
             case 5:
-                output.open(argv[2]);
-                if (output.is_open())
-                {
-                    graph->print_graph(output);
-                    output << std::endl;
-                    std::cout << "Grafo impresso no arquivo de saida" << std::endl;
-                    output.close();
-                }
-                else
-                {
-                    std::cerr << "Erro ao abrir o arquivo de saida" << std::endl;
-                }
+                saveGraphToFile(graph, argv[2]);
                 break;
 
             case 6:
@@ -186,6 +195,9 @@ int main(int argc, char *argv[])
                     std::cout << i << ", ";
                 }
                 std::cout << std::endl;
+
+                saveGraphToFile(graph, argv[2]);
+
                 break;
 
             case 7:
@@ -197,6 +209,9 @@ int main(int argc, char *argv[])
                     std::cout << i << ", ";
                 }
                 std::cout << std::endl;
+
+                saveGraphToFile(graph, argv[2]);
+
                 break;
 
             case 8:
@@ -218,6 +233,9 @@ int main(int argc, char *argv[])
                     }
                     std::cout << std::endl;
                 }
+
+                saveGraphToFile(graph, argv[2]);
+
                 break;
 
             case 9:
@@ -247,6 +265,9 @@ int main(int argc, char *argv[])
                     subgraph->print_graph();
                 }
                 delete subgraph;
+
+                saveGraphToFile(graph, argv[2]);
+
                 break;
 
             case 11:
@@ -277,6 +298,9 @@ int main(int argc, char *argv[])
                     std::cerr << "Erro ao abrir o arquivo de saida" << std::endl;
                 }
                 kruscal.close();
+
+                saveGraphToFile(graph, argv[2]);
+
                 break;
             case 12:
                 if (*argv[3] != '0')
@@ -294,6 +318,9 @@ int main(int argc, char *argv[])
                 {
                     std::cerr << "Erro ao abrir o arquivo de saida" << std::endl;
                 }
+
+                saveGraphToFile(graph, argv[2]);
+                
                 break;
             case 13:
                 raio      = graph->get_raio();
@@ -315,8 +342,19 @@ int main(int argc, char *argv[])
                     std::cout << i << ", ";
                 }
                 std::cout << std::endl;
+                
+                saveGraphToFile(graph, argv[2]);
+
                 break;
             case 14:
+                std::cout << "Conjunto de vertices de articulacao: ";
+                for (auto i : graph->findArticulationPoints())
+                {
+                    std::cout << i << ", ";
+                }
+
+                saveGraphToFile(graph, argv[2]);
+
                 break;
             default:
                 std::cout << "Opcao invalida" << std::endl;
@@ -334,39 +372,3 @@ int main(int argc, char *argv[])
     output.close();
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-/*
-    graph->print_graph(output);
-    graph->print_graph();
-
-    std::cout << "Numero de noss do grafo: " << graph->get_number_of_nodes() << std::endl;
-    std::cout << "Numero de arestas do grafo: " << graph->get_number_of_edges() << std::endl;
-
-    //std::ofstream dotFile("output/dot/DFS.dot");
-    //std::ofstream krscal("output/dot/krscal_6nU.dot");
-
-    //graph->busca_prof(1, dotFile);
-    //Graph *ArvoreMin = graph->kruscal({ 1, 2, 3, 4, 5, 6 }, krscal);
-
-    std::vector<size_t> vetor = graph->transitive_closure(3);
-
-    for (size_t i = 0; i < vetor.size(); i++)
-    {
-        std::cout << vetor[i] << " ";
-    }
-
-    delete graph;
-    //delete ArvoreMin;
-
-    */
-
-//output/png/

@@ -36,6 +36,9 @@ public:
     float                           get_raio();
     std::vector<size_t>             get_centro();
     std::vector<size_t>             get_periferia();
+    std::vector<int> findArticulationPoints();
+    void DFS_ArticulationPoints(int node_id, std::map<int, bool>& visited, std::map<int, int>& discoveryTime,
+                                    std::map<int, int>& lowTime, std::map<int, int>& parent, std::vector<int>& articulationPoints, int& time);
 
 private:
     size_t _number_of_nodes;

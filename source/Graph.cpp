@@ -1,7 +1,5 @@
 #include "../include/Graph.hpp"
 
-// Tratar todos os caso de pesos nos nós;
-
 Graph::Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool weighted_nodes)
 {
     this->_number_of_nodes = 0;
@@ -22,7 +20,6 @@ Graph::Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool w
 
     for (int i = 1; i <= number_of_nodes; i++)
     {
-        // adicionar um metodo para adicionar um nó com peso
         this->add_node(i);
     }
 
@@ -177,11 +174,7 @@ void Graph::add_node(size_t node_id, float weight)
 }
 
 void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool reverse)
-{ /*
-    if (this->conected(node_id_1, node_id_2))
-        return;
-    */
-
+{
     if (find_node(node_id_2) == nullptr)
     {
         this->add_node(node_id_2);
@@ -222,9 +215,6 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool reve
     this->_number_of_edges++;
 }
 
-// Qual format para imprimir no terminal ?
-
-// Imprimindo a lista de adjacencia
 void Graph::print_graph()
 {
     Node *node = this->_first;
@@ -354,8 +344,6 @@ void Graph::busca_prof(size_t node_id, std::ofstream& output_file)
     std::vector<std::tuple<size_t, size_t, float>> arv;
     std::vector<std::tuple<size_t, size_t, float>> retorno;
     DFS(find_node(node_id), node_id, -1, visited, output_file, printed_return_edges, arv, retorno);
-
-    // Devo fazer a busca a partir de todos os nós, caso o grafo não seja conexo ?
 
     node = this->_first;
 
@@ -490,6 +478,22 @@ void Graph ::Union(std::map<int, int>& components, int x, int y)
     components[xset] = yset;
 }
 
+void Graph::DFS_TC(size_t node_id, std::map<size_t, bool>& visited, std::vector<size_t>& stack)
+{
+    visited[node_id] = true;
+    stack.push_back(node_id);
+    Node *node = find_node(node_id);
+    Edge *edge = node->_first_edge;
+    while (edge != nullptr)
+    {
+        if (!visited[edge->_target_id])
+        {
+            DFS_TC(edge->_target_id, visited, stack);
+        }
+        edge = edge->_next_edge;
+    }
+}
+
 std::vector<size_t> Graph::transitive_closure(size_t node_id)
 {
     if (!this->_directed)
@@ -510,22 +514,6 @@ std::vector<size_t> Graph::transitive_closure(size_t node_id)
     DFS_TC(node_id, visited, stack);
 
     return stack;
-}
-
-void Graph::DFS_TC(size_t node_id, std::map<size_t, bool>& visited, std::vector<size_t>& stack)
-{
-    visited[node_id] = true;
-    stack.push_back(node_id);
-    Node *node = find_node(node_id);
-    Edge *edge = node->_first_edge;
-    while (edge != nullptr)
-    {
-        if (!visited[edge->_target_id])
-        {
-            DFS_TC(edge->_target_id, visited, stack);
-        }
-        edge = edge->_next_edge;
-    }
 }
 
 std::vector<size_t> Graph::transitive_indirect(size_t node_id)
@@ -910,4 +898,58 @@ Graph* Graph::prim(size_t start_node_id) {
     }
 
     return mst;
+}
+
+void Graph::DFS_ArticulationPoints(int node_id, std::map<int, bool>& visited, std::map<int, int>& discoveryTime,
+                                    std::map<int, int>& lowTime, std::map<int, int>& parent, std::vector<int>& articulationPoints, int& time) {
+    visited[node_id] = true;
+    discoveryTime[node_id] = lowTime[node_id] = ++time;
+    int childCount = 0;
+
+    Node* node = this->find_node(node_id);
+    for (Edge* edge = node->_first_edge; edge != nullptr; edge = edge->_next_edge) {
+        int neighbor_id = edge->_target_id;
+
+        if (!visited[neighbor_id]) {
+            childCount++;
+            parent[neighbor_id] = node_id;
+            DFS_ArticulationPoints(neighbor_id, visited, discoveryTime, lowTime, parent, articulationPoints, time);
+
+            lowTime[node_id] = std::min(lowTime[node_id], lowTime[neighbor_id]);
+
+            if (parent[node_id] == -1 && childCount > 1) {
+                articulationPoints.push_back(node_id);
+            }
+            if (parent[node_id] != -1 && lowTime[neighbor_id] >= discoveryTime[node_id]) {
+                articulationPoints.push_back(node_id);
+            }
+        }
+        else if (neighbor_id != parent[node_id]) {
+            lowTime[node_id] = std::min(lowTime[node_id], discoveryTime[neighbor_id]);
+        }
+    }
+}
+
+std::vector<int> Graph::findArticulationPoints() {
+    std::vector<int> articulationPoints;
+    std::map<int, int> discoveryTime;
+    std::map<int, int> lowTime;
+    std::map<int, bool> visited;
+    std::map<int, int> parent;
+    int time = 0;
+
+    for (Node* node = _first; node != nullptr; node = node->_next_node) {
+        visited[node->_id] = false;
+        discoveryTime[node->_id] = -1;
+        lowTime[node->_id] = -1;
+        parent[node->_id] = -1;
+    }
+
+    for (Node* node = _first; node != nullptr; node = node->_next_node) {
+        if (!visited[node->_id]) {
+            DFS_ArticulationPoints(node->_id, visited, discoveryTime, lowTime, parent, articulationPoints, time);
+        }
+    }
+
+    return articulationPoints;
 }
