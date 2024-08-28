@@ -4,16 +4,16 @@ Este repositório contém a implementação dos algoritmos estudados na discipli
 # Instruções para compilar e rodar:
 
 Seguimos o padrão solicitado pela professora da Disciplina DCC059 - Teoria dos Grafos,
-compilando com o g++ e, executando com os arquivos de entrada, saída e pesos. Como exemplo:
+compilando com makefile, executando com os arquivos de entrada, saída e pesos. Como exemplo:
 
-Compilação: g++ *.cpp -o main
-Execução: ./main instances_example/5nD_2 output.txt 0 1 1
+Compilação: make
+Execução: ./graph_project instances_example/6nU.dat output.txt 0 1 1
 
 0 indica que o grafo é não direcionado.
 1 indica que o grafo é ponderado nas arestas.
 1 indica que o grafo é ponderado nos vértices.
 
-- É claro que 5nD_2 é uma escolha arbitrária e, você pode (assim como deve) escolher o arquivo de interesse que esteja dentro de "instances_example".
+- É claro que 6nU.dat é uma escolha arbitrária e, você pode (assim como deve) escolher o arquivo de interesse que esteja dentro de "instances_example".
 
 Após compilar e rodar, bem como quando realizar qualquer mudança no grafo original, recomendamos que exiba o grafo (opção 5).
 
