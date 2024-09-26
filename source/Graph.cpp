@@ -707,52 +707,59 @@ std::vector<size_t> Graph::floyd_warshall(size_t node_id_1, size_t node_id_2)
     return path;
 }
 
-std::vector<size_t> Graph::edsger_dijkstra(size_t node_id_1, size_t node_id_2) {
-    std::map<size_t, float> dist;
-    std::map<size_t, size_t> previous;
-    std::vector<size_t> path;
+std::vector<size_t> Graph::edsger_dijkstra(size_t node_id_1, size_t node_id_2)
+{
+    std::map<size_t, float>                                                                                                      dist;
+    std::map<size_t, size_t>                                                                                                     previous;
+    std::vector<size_t>                                                                                                          path;
     std::priority_queue<std::pair<float, size_t>, std::vector<std::pair<float, size_t>>, std::greater<std::pair<float, size_t>>> queue;
 
-    for (Node* node = _first; node != nullptr; node = node->_next_node) {
-        dist[node->_id] = std::numeric_limits<float>::infinity();
+    for (Node *node = _first; node != nullptr; node = node->_next_node)
+    {
+        dist[node->_id]     = std::numeric_limits<float>::infinity();
         previous[node->_id] = (size_t)-1;  // Use size_t para representar o valor inválido
     }
     dist[node_id_1] = 0;
-    queue.push({0, node_id_1});
+    queue.push({ 0, node_id_1 });
 
-    while (!queue.empty()) {
+    while (!queue.empty())
+    {
         size_t u = queue.top().second;
         queue.pop();
 
-        if (u == node_id_2) {
+        if (u == node_id_2)
+        {
             break;
         }
 
-        Node* current_node = find_node(u);
-        for (Edge* edge = current_node->_first_edge; edge != nullptr; edge = edge->_next_edge) {
-            size_t v = edge->_target_id;
-            float alt = dist[u] + edge->_weight;
+        Node *current_node = find_node(u);
+        for (Edge *edge = current_node->_first_edge; edge != nullptr; edge = edge->_next_edge)
+        {
+            size_t v   = edge->_target_id;
+            float  alt = dist[u] + edge->_weight;
 
-            if (alt < dist[v]) {
-                dist[v] = alt;
+            if (alt < dist[v])
+            {
+                dist[v]     = alt;
                 previous[v] = u;
-                queue.push({alt, v});
+                queue.push({ alt, v });
             }
         }
     }
 
-    for (size_t at = node_id_2; at != (size_t)-1; at = previous[at]) {
+    for (size_t at = node_id_2; at != (size_t)-1; at = previous[at])
+    {
         path.push_back(at);
     }
     std::reverse(path.begin(), path.end());
 
-    if (path.size() == 1 && path[0] != node_id_1) {
+    if (path.size() == 1 && path[0] != node_id_1)
+    {
         path.clear();
     }
 
     return path;
 }
-
 
 std::vector<std::vector<float>> Graph::distancias_minimas()
 {
@@ -848,48 +855,50 @@ std::vector<size_t> Graph::get_periferia()
     return periferia;
 }
 
+Graph *Graph::prim(size_t start_node_id)
+{
+    Graph *mst = new Graph(this->_directed, this->_weighted_edges, this->_weighted_nodes);
 
-Graph* Graph::prim(size_t start_node_id) {
-
-    Graph* mst = new Graph(this->_directed, this->_weighted_edges, this->_weighted_nodes);
-
-    if (!this->_weighted_edges) {
+    if (!this->_weighted_edges)
+    {
         std::cerr << "O algoritmo de Prim requer um grafo com arestas ponderadas." << std::endl;
         return mst;
     }
 
     std::set<size_t> visited;
-    
-  
-    auto compare = [](const std::tuple<size_t, size_t, float>& a, const std::tuple<size_t, size_t, float>& b) {
-        return std::get<2>(a) > std::get<2>(b);
-    };
-    
+
+    auto compare = [](const std::tuple<size_t, size_t, float>& a, const std::tuple<size_t, size_t, float>& b) { return std::get<2>(a) > std::get<2>(b); };
+
     std::priority_queue<std::tuple<size_t, size_t, float>, std::vector<std::tuple<size_t, size_t, float>>, decltype(compare)> min_heap(compare);
 
     visited.insert(start_node_id);
 
-    Node* start_node = this->find_node(start_node_id);
-    Edge* edge = start_node->_first_edge;
-    while (edge != nullptr) {
+    Node *start_node = this->find_node(start_node_id);
+    Edge *edge       = start_node->_first_edge;
+    while (edge != nullptr)
+    {
         min_heap.push(std::make_tuple(start_node_id, edge->_target_id, edge->_weight));
         edge = edge->_next_edge;
     }
 
-    while (!min_heap.empty()) {
-        std::tuple<size_t, size_t, float> edge = min_heap.top();
-        size_t node1 = std::get<0>(edge);
-        size_t node2 = std::get<1>(edge);
-        float weight = std::get<2>(edge);
+    while (!min_heap.empty())
+    {
+        std::tuple<size_t, size_t, float> edge   = min_heap.top();
+        size_t                            node1  = std::get<0>(edge);
+        size_t                            node2  = std::get<1>(edge);
+        float                             weight = std::get<2>(edge);
         min_heap.pop();
 
-        if (visited.find(node2) == visited.end()) {
+        if (visited.find(node2) == visited.end())
+        {
             mst->add_edge(node1, node2, weight);
             visited.insert(node2);
-            Node* new_node = this->find_node(node2);
-            Edge* new_edge = new_node->_first_edge;
-            while (new_edge != nullptr) {
-                if (visited.find(new_edge->_target_id) == visited.end()) {
+            Node *new_node = this->find_node(node2);
+            Edge *new_edge = new_node->_first_edge;
+            while (new_edge != nullptr)
+            {
+                if (visited.find(new_edge->_target_id) == visited.end())
+                {
                     min_heap.push(std::make_tuple(node2, new_edge->_target_id, new_edge->_weight));
                 }
                 new_edge = new_edge->_next_edge;
@@ -900,56 +909,155 @@ Graph* Graph::prim(size_t start_node_id) {
     return mst;
 }
 
-void Graph::DFS_ArticulationPoints(int node_id, std::map<int, bool>& visited, std::map<int, int>& discoveryTime,
-                                    std::map<int, int>& lowTime, std::map<int, int>& parent, std::vector<int>& articulationPoints, int& time) {
-    visited[node_id] = true;
+void Graph::DFS_ArticulationPoints(int node_id, std::map<int, bool>& visited, std::map<int, int>& discoveryTime, std::map<int, int>& lowTime,
+                                   std::map<int, int>& parent, std::vector<int>& articulationPoints, int& time)
+{
+    visited[node_id]       = true;
     discoveryTime[node_id] = lowTime[node_id] = ++time;
-    int childCount = 0;
+    int childCount                            = 0;
 
-    Node* node = this->find_node(node_id);
-    for (Edge* edge = node->_first_edge; edge != nullptr; edge = edge->_next_edge) {
+    Node *node = this->find_node(node_id);
+    for (Edge *edge = node->_first_edge; edge != nullptr; edge = edge->_next_edge)
+    {
         int neighbor_id = edge->_target_id;
 
-        if (!visited[neighbor_id]) {
+        if (!visited[neighbor_id])
+        {
             childCount++;
             parent[neighbor_id] = node_id;
             DFS_ArticulationPoints(neighbor_id, visited, discoveryTime, lowTime, parent, articulationPoints, time);
 
             lowTime[node_id] = std::min(lowTime[node_id], lowTime[neighbor_id]);
 
-            if (parent[node_id] == -1 && childCount > 1) {
+            if (parent[node_id] == -1 && childCount > 1)
+            {
                 articulationPoints.push_back(node_id);
             }
-            if (parent[node_id] != -1 && lowTime[neighbor_id] >= discoveryTime[node_id]) {
+            if (parent[node_id] != -1 && lowTime[neighbor_id] >= discoveryTime[node_id])
+            {
                 articulationPoints.push_back(node_id);
             }
         }
-        else if (neighbor_id != parent[node_id]) {
+        else if (neighbor_id != parent[node_id])
+        {
             lowTime[node_id] = std::min(lowTime[node_id], discoveryTime[neighbor_id]);
         }
     }
 }
 
-std::vector<int> Graph::findArticulationPoints() {
-    std::vector<int> articulationPoints;
-    std::map<int, int> discoveryTime;
-    std::map<int, int> lowTime;
+std::vector<int> Graph::findArticulationPoints()
+{
+    std::vector<int>    articulationPoints;
+    std::map<int, int>  discoveryTime;
+    std::map<int, int>  lowTime;
     std::map<int, bool> visited;
-    std::map<int, int> parent;
-    int time = 0;
+    std::map<int, int>  parent;
+    int                 time = 0;
 
-    for (Node* node = _first; node != nullptr; node = node->_next_node) {
-        visited[node->_id] = false;
+    for (Node *node = _first; node != nullptr; node = node->_next_node)
+    {
+        visited[node->_id]       = false;
         discoveryTime[node->_id] = -1;
-        lowTime[node->_id] = -1;
-        parent[node->_id] = -1;
+        lowTime[node->_id]       = -1;
+        parent[node->_id]        = -1;
     }
 
-    for (Node* node = _first; node != nullptr; node = node->_next_node) {
-        if (!visited[node->_id]) {
+    for (Node *node = _first; node != nullptr; node = node->_next_node)
+    {
+        if (!visited[node->_id])
+        {
             DFS_ArticulationPoints(node->_id, visited, discoveryTime, lowTime, parent, articulationPoints, time);
         }
     }
 
     return articulationPoints;
+}
+
+void Graph::new_read(std::ifstream& instance)
+{
+    int                              p, num_nodes;
+    std::vector<int>                 nodes;
+    std::map<int, int>               nodes_weight;
+    std::vector<std::pair<int, int>> edges;
+    std::string                      skip;
+    std::string                      line;
+
+    while (std::getline(instance, line))
+    {
+        if (line.find("param p := ") != std::string::npos)
+        {
+            std::stringstream ss(line);
+            ss >> skip >> skip >> skip >> p;
+            std::cout << "Particoes: " << p << std::endl;
+        }
+
+        if (line.find("vertici") != std::string::npos)
+        {
+            std::stringstream ss(line);
+            ss >> skip >> num_nodes;
+            std::cout << "Numero de vertices: " << num_nodes << std::endl;
+        }
+
+        if (line.find("set V :=") != std::string::npos)
+        {
+            std::getline(instance, line);
+            //std::cout << line << std::endl;
+            std::stringstream ss(line);
+
+            while (ss >> skip)
+            {
+                nodes.push_back(std::stoi(skip));
+            }
+        }
+
+        if (line.find("param w :=") != std::string::npos)
+        {
+            while (std::getline(instance, line))
+            {
+                if (line.find(";") != std::string::npos)
+                {
+                    break;
+                }
+                std::stringstream ss(line);
+                int               u, w;
+                ss >> u >> w;
+                nodes_weight[u] = w;
+            }
+        }
+
+        if (line.find("set E :=") != std::string::npos)
+        {
+            while (std::getline(instance, line))
+            {
+                if (line.find(";") != std::string::npos)
+                {
+                    break;
+                }
+                std::stringstream ss(line);
+                char              ignore;
+                int               u, v;
+                while (ss >> ignore >> u >> ignore >> v >> ignore)
+                {
+                    edges.push_back({ u, v });
+                }
+            }
+        }
+    }
+
+    for (auto i : nodes)
+    {
+        std::cout << i << " ";
+    }
+
+    std::cout << std::endl;
+
+    for (auto i : nodes_weight)
+    {
+        std::cout << i.first << " " << i.second << std::endl;
+    }
+
+    for (auto i : edges)
+    {
+        std::cout << i.first << " " << i.second << std::endl;
+    }
 }
