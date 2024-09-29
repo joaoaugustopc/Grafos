@@ -28,19 +28,23 @@ public:
     std::vector<size_t>             transitive_indirect(size_t node_id);
     std::vector<size_t>             edsger_dijkstra(size_t node_id_1, size_t node_id_2);
     std::vector<size_t>             floyd_warshall(size_t node_id_1, size_t node_id_2);
-    Graph                           *prim(size_t start_node_id);
-    Graph                           *kruscal(std::vector<size_t> nodes_ids);
+    Graph                          *prim(size_t start_node_id);
+    Graph                          *kruscal(std::vector<size_t> nodes_ids);
     std::vector<std::vector<float>> distancias_minimas();
     std::vector<float>              get_excentricidades();
     float                           get_diametro();
     float                           get_raio();
     std::vector<size_t>             get_centro();
     std::vector<size_t>             get_periferia();
-    std::vector<int> findArticulationPoints();
-    void DFS_ArticulationPoints(int node_id, std::map<int, bool>& visited, std::map<int, int>& discoveryTime,
-                                    std::map<int, int>& lowTime, std::map<int, int>& parent, std::vector<int>& articulationPoints, int& time);
-    
+    std::vector<int>                findArticulationPoints();
+    void DFS_ArticulationPoints(int node_id, std::map<int, bool>& visited, std::map<int, int>& discoveryTime, std::map<int, int>& lowTime,
+                                std::map<int, int>& parent, std::vector<int>& articulationPoints, int& time);
+
+    std::vector<Node> get_nodes();
+
     void new_read(std::ifstream& instance);
+    void mggp(int p);
+    int compute_gap(std::map<int, int> partition_weights);
 
 private:
     size_t _number_of_nodes;
@@ -65,6 +69,12 @@ private:
                                                     std::vector<std::tuple<size_t, size_t, float>> *arestas_retorno = nullptr);
     std::vector<std::vector<float>> create_matrix();
     std::vector<std::vector<float>> create_path_matrix();
+    //Procedimento Construtivo
+    std::vector<Graph> constructive_procedure(int p);
+    std::vector<std::tuple<int, int>> get_crescent_gap_edges(std::vector<Graph>&partitions, std::vector<int>& nodes, std::map<int, int>&nodes_weight );
+    int compute_total_gap(std::vector<Graph>& partitions, std::map<int, int>& node_weights);
+    std::map<int, int> get_partition_weights(Graph& partition);
+
 };
 
 #endif  //GRAPH_HPP
