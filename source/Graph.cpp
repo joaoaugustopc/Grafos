@@ -1063,16 +1063,17 @@ void Graph::new_read(std::ifstream& instance)
 }
 
 
-// Implementação das funções auxiliares
+// fauxs
 void initialize_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, int numVertices, int numSubgraphs)
 {
     // Inicializa a matriz tabu com zeros
     for (int v = 0; v < numVertices; ++v)
-    {
-        for (int s = 0; s < numSubgraphs; ++s) {
-            tabuMatrix[v][s] = -std::numeric_limits<int>::max();
+        {
+            for (int s = 0; s < numSubgraphs; ++s)
+                {
+                    tabuMatrix[v][s] = -std::numeric_limits<int>::max();
+                }
         }
-    }
 }
 
 std::vector<std::tuple<int, int, int>> generate_neighborhood(const std::vector<std::vector<int>>& adjList,
@@ -1083,71 +1084,65 @@ std::vector<std::tuple<int, int, int>> generate_neighborhood(const std::vector<s
 
     for (int s_from = 0; s_from < numSubgraphs; ++s_from) {
         const auto& subgraph_from = current_solution[s_from];
-        for (int v : subgraph_from) {
+        for (int v : subgraph_from)
+        {
             // Encontra subgrafos adjacentes
             for (int s_to = 0; s_to < numSubgraphs; ++s_to)
             {
                 if (s_to == s_from) continue;
                 const auto& subgraph_to = current_solution[s_to];
-                // Verifica se há adjacência entre v e algum vértice em subgraph_to
                 bool is_adjacent = false;
                 for (int u : subgraph_to)
-                {
-                    if (std::find(adjList[v].begin(), adjList[v].end(), u) != adjList[v].end()) {
-                        is_adjacent = true;
-                        break;
+                    {
+                        if (std::find(adjList[v].begin(), adjList[v].end(), u) != adjList[v].end())
+                            {
+                                is_adjacent = true;
+                                break;
+                            }
                     }
-                }
-                if (is_adjacent) {
-                    // Verifica se o movimento é factível
-                    if (subgraph_from.size() > 3) { // Supondo que o subgrafo deve ter pelo menos 3 vértices
+                if (is_adjacent)
+                {
+                    if (subgraph_from.size() > 3)
+                    {
                         moves.push_back(std::make_tuple(v, s_from, s_to));
                     }
                 }
             }
         }
     }
-
     return moves;
 }
 
 void evaluate_moves(const std::vector<std::tuple<int, int, int>>& neighborhood_moves,
-                    const std::vector<std::vector<int>>& current_solution,
-                    const std::map<int, std::map<int, int>>& tabuMatrix,
-                    int iteration,
-                    int l_in,
-                    const std::vector<std::vector<int>>& best_solution,
-                    std::tuple<int, int, int>& best_move,
-                    double& best_gap,
-                    const std::vector<int>& vertexWeights) {
-    for (const auto& move : neighborhood_moves) {
+const std::vector<std::vector<int>>& current_solution, const std::map<int, std::map<int, int>>& tabuMatrix,
+int iteration, int l_in, const std::vector<std::vector<int>>& best_solution, std::tuple<int, int,int>& best_move,
+double& best_gap, const std::vector<int>& vertexWeights)
+{
+    for (const auto& move : neighborhood_moves)
+    {
         int v = std::get<0>(move);
         int s_from = std::get<1>(move);
         int s_to = std::get<2>(move);
 
-        // Cria uma cópia da solução atual para aplicar o movimento
         std::vector<std::vector<int>> new_solution = current_solution;
 
-        // Aplica o movimento
         new_solution[s_from].erase(std::remove(new_solution[s_from].begin(), new_solution[s_from].end(), v),
                                    new_solution[s_from].end());
         new_solution[s_to].push_back(v);
 
-        // Calcula o gap total da nova solução
         double total_gap = compute_total_gap(new_solution, vertexWeights);
 
-        // Verifica se o movimento é melhor
-        if (total_gap < best_gap) {
+        if (total_gap < best_gap)
+        {
             best_move = move;
             best_gap = total_gap;
         }
     }
 }
 
-bool is_tabu(const std::tuple<int, int, int>& move,
-             const std::map<int, std::map<int, int>>& tabuMatrix,
-             int iteration,
-             int l_in) {
+bool is_tabu(const std::tuple<int, int, int>& move, const std::map<int, std::map<int, int>>& tabuMatrix,
+                int iteration,int l_in)
+{
     int v = std::get<0>(move);
     int s_to = std::get<2>(move);
 
@@ -1157,30 +1152,31 @@ bool is_tabu(const std::tuple<int, int, int>& move,
     return false; // Movimento permitido
 }
 
-void apply_move(const std::tuple<int, int, int>& move,
-                std::vector<std::vector<int>>& current_solution) {
+void apply_move(const std::tuple<int, int, int>& move, std::vector<std::vector<int>>& current_solution)
+{
     int v = std::get<0>(move);
     int s_from = std::get<1>(move);
     int s_to = std::get<2>(move);
 
     // Remove o vértice do subgrafo de origem
-    current_solution[s_from].erase(std::remove(current_solution[s_from].begin(),
-                                               current_solution[s_from].end(),
-                                               v),
+    current_solution[s_from].erase(std::remove(current_solution[s_from].begin(), current_solution[s_from].end(),v),
                                    current_solution[s_from].end());
 
     // Adiciona o vértice ao subgrafo de destino
     current_solution[s_to].push_back(v);
 }
 
-double compute_total_gap(const std::vector<std::vector<int>>& solution,
-                         const std::vector<int>& vertexWeights) {
+double compute_total_gap(const std::vector<std::vector<int>>& solution, const std::vector<int>& vertexWeights)
+{
     double total_gap = 0.0;
-    for (const auto& subgraph : solution) {
-        if (!subgraph.empty()) {
+    for (const auto& subgraph : solution)
+    {
+        if (!subgraph.empty())
+        {
             int max_weight = std::numeric_limits<int>::min();
             int min_weight = std::numeric_limits<int>::max();
-            for (int v : subgraph) {
+            for (int v : subgraph)
+            {
                 int weight = vertexWeights[v];
                 if (weight > max_weight) max_weight = weight;
                 if (weight < min_weight) min_weight = weight;
@@ -1191,14 +1187,13 @@ double compute_total_gap(const std::vector<std::vector<int>>& solution,
     return total_gap;
 }
 
-void update_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix,
-                        const std::tuple<int, int, int>& move,
-                        int iteration,
-                        int l_in) {
+void update_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, const std::tuple<int, int, int>& move,
+                        int iteration, int l_in)
+{
     int v = std::get<0>(move);
     int s_to = std::get<2>(move);
 
-    // Atualiza a tabu tenure do movimento
+    // Atualiza a tabu
     tabuMatrix[v][s_to] = iteration;
 }
 
@@ -1206,9 +1201,9 @@ std::vector<std::vector<int>> tabu_search(const std::vector<std::vector<int>>& a
 const std::vector<int>& vertexWeights, const std::vector<std::vector<int>>& initial_partition, int max_iter,
 int l_min, int l_max)
 {
-    // Solução inicial e matriz tabu
+    // Solução inicial
     std::vector<std::vector<int>> current_solution = initial_partition;
-    std::vector<std::vector<int>> best_solution = current_solution; // Cópia profunda
+    std::vector<std::vector<int>> best_solution = current_solution;
     std::map<int, std::map<int, int>> tabuMatrix;
     int numVertices = vertexWeights.size();
     int numSubgraphs = current_solution.size();
@@ -1216,11 +1211,12 @@ int l_min, int l_max)
     int l_in = l_max; // Valor inicial de tabu tenure
     double previous_solution_gap = compute_total_gap(current_solution, vertexWeights);
 
-    for (int iteration = 0; iteration < max_iter; ++iteration) {
-        // 1. Explorar a vizinhança
+    for (int iteration = 0; iteration < max_iter; ++iteration)
+    {
+        // Explorar a vizinhança
         std::vector<std::tuple<int, int, int>> neighborhood_moves = generate_neighborhood(adjList, current_solution);
 
-        // 2. Avaliar cada movimento
+        // Avaliar cada movimento
         std::tuple<int, int, int> best_move(-1, -1, -1);
         double best_gap = std::numeric_limits<double>::max();
 
@@ -1228,35 +1224,39 @@ int l_min, int l_max)
                        best_move, best_gap, vertexWeights);
 
         // Verifica se um movimento válido foi encontrado
-        if (std::get<0>(best_move) == -1) {
+        if (std::get<0>(best_move) == -1)
+        {
             // Nenhum movimento válido disponível
             break;
         }
-
-        // 3. Verificar se o movimento é tabu
-        if (is_tabu(best_move, tabuMatrix, iteration, l_in)) {
-            // Aspiração: Permite o movimento tabu se ele melhora a melhor solução encontrada
-            if (best_gap < compute_total_gap(best_solution, vertexWeights)) {
+        
+        if (is_tabu(best_move, tabuMatrix, iteration, l_in))
+        {
+            if (best_gap < compute_total_gap(best_solution, vertexWeights))
+            {
                 apply_move(best_move, current_solution);
-                best_solution = current_solution; // Cópia profunda
+                best_solution = current_solution;
             }
-        } else {
+        }
+        else
+        {
             apply_move(best_move, current_solution);
         }
 
-        // 4. Atualizar a matriz Tabu
         update_tabu_matrix(tabuMatrix, best_move, iteration, l_in);
 
-        // 5. Atualizar a melhor solução
+        // Atualizar a melhor solução
         double current_solution_gap = compute_total_gap(current_solution, vertexWeights);
-        if (current_solution_gap < compute_total_gap(best_solution, vertexWeights)) {
-            best_solution = current_solution; // Cópia profunda
+        if (current_solution_gap < compute_total_gap(best_solution, vertexWeights))
+        {
+            best_solution = current_solution;
         }
 
-        // 6. Adaptar o tenure dinamicamente
-        if (current_solution_gap < previous_solution_gap) {
+        if (current_solution_gap < previous_solution_gap)
+        {
             l_in = std::max(l_in - 1, l_min); // Se houve melhoria, intensificar a busca
-        } else {
+        } else
+        {
             l_in = std::min(l_in + 1, l_max); // Caso contrário, diversificar a busca
         }
         previous_solution_gap = current_solution_gap;
