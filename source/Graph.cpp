@@ -1188,7 +1188,7 @@ std::vector<std::tuple<int, int>> Graph ::get_crescent_gap_edges(std::vector<Gra
     return edges;
 }
 
-std::vector<Graph> Graph ::constructive_procedure(int p)
+std::vector<Graph*> Graph ::constructive_procedure(int p)
 {
     //Vetor de Subgrafos (Partições)
     std::vector<Graph> partitions;
@@ -1199,7 +1199,7 @@ std::vector<Graph> Graph ::constructive_procedure(int p)
 
     // Inicializar o conjunto de partições
     //Conjunto Solução
-    std::vector<Graph> X;
+    std::vector<Graph*> X;
     std::vector<int>   added_nodes;  // Conjunto de vértices adicionados a alguma partição
 
     // Inicializar as partições
@@ -1210,13 +1210,14 @@ std::vector<Graph> Graph ::constructive_procedure(int p)
         edges.erase(edges.begin());
 
         // Verificar se algum vertice da aresta não é adjacente a nenhuma partição
-        if (std::find(X.begin(), X.end(), std::get<0>(edge)) == X.end() && std::find(X.begin(), X.end(), std::get<1>(edge)) == X.end())
+        if (std::find(added_nodes.begin(), added_nodes.end(), std::get<0>(edge)) == added_nodes.end() &&
+            std::find(added_nodes.begin(), added_nodes.end(), std::get<1>(edge)) == added_nodes.end())
         {
             // Criar uma nova partição
-            Graph partition(this->_directed, this->_weighted_edges, this->_weighted_nodes);
-            partition.add_node(std::get<0>(edge), nodes_weight[std::get<0>(edge)]);
-            partition.add_node(std::get<1>(edge), nodes_weight[std::get<1>(edge)]);
-            partition.add_edge(std::get<0>(edge), std::get<1>(edge), 1);
+            Graph* partition = new Graph(this->_directed, this->_weighted_edges, this->_weighted_nodes);
+            partition->add_node(std::get<0>(edge), nodes_weight[std::get<0>(edge)]);
+            partition->add_node(std::get<1>(edge), nodes_weight[std::get<1>(edge)]);
+            partition->add_edge(std::get<0>(edge), std::get<1>(edge), 1);
             X.push_back(partition);
             added_nodes.push_back(std::get<0>(edge));
             added_nodes.push_back(std::get<1>(edge));
@@ -1238,10 +1239,10 @@ std::vector<Graph> Graph ::constructive_procedure(int p)
                 //Juntar o vértice j a partição que contém o vértice i
                 for (auto partition : X)
                 {
-                    if (partition.find_node(std::get<0>(edge)) != nullptr)
+                    if (partition->find_node(std::get<0>(edge)) != nullptr)
                     {
-                        partition.add_node(std::get<1>(edge), nodes_weight[std::get<1>(edge)]);
-                        partition.add_edge(std::get<0>(edge), std::get<1>(edge), 1);
+                        partition->add_node(std::get<1>(edge), nodes_weight[std::get<1>(edge)]);
+                        partition->add_edge(std::get<0>(edge), std::get<1>(edge), 1);
                         added_nodes.push_back(std::get<1>(edge));
                         break;
                     }
@@ -1257,10 +1258,10 @@ std::vector<Graph> Graph ::constructive_procedure(int p)
 
                 for (auto partition : X)
                 {
-                    if (partition.find_node(std::get<1>(edge)) != nullptr)
+                    if (partition->find_node(std::get<1>(edge)) != nullptr)
                     {
-                        partition.remove_node(std::get<1>(edge));
-                        partition.remove_edge(std::get<0>(edge), std::get<1>(edge));
+                        partition->remove_node(std::get<1>(edge));
+                        partition->remove_edge(std::get<0>(edge), std::get<1>(edge));
                         added_nodes.erase(std::remove(added_nodes.begin(), added_nodes.end(), std::get<1>(edge)), added_nodes.end());
                         break;
                     }
@@ -1275,10 +1276,10 @@ std::vector<Graph> Graph ::constructive_procedure(int p)
                 
                 for (auto partition : X)
                 {
-                    if (partition.find_node(std::get<1>(edge)) != nullptr)
+                    if (partition->find_node(std::get<1>(edge)) != nullptr)
                     {
-                        partition.add_node(std::get<0>(edge), nodes_weight[std::get<0>(edge)]);
-                        partition.add_edge(std::get<0>(edge), std::get<1>(edge), 1);
+                        partition->add_node(std::get<0>(edge), nodes_weight[std::get<0>(edge)]);
+                        partition->add_edge(std::get<0>(edge), std::get<1>(edge), 1);
                         added_nodes.push_back(std::get<0>(edge));
                         break;
                     }
@@ -1294,10 +1295,10 @@ std::vector<Graph> Graph ::constructive_procedure(int p)
 
                 for (auto partition : X)
                 {
-                    if (partition.find_node(std::get<0>(edge)) != nullptr)
+                    if (partition->find_node(std::get<0>(edge)) != nullptr)
                     {
-                        partition.remove_node(std::get<0>(edge));
-                        partition.remove_edge(std::get<0>(edge), std::get<1>(edge));
+                        partition->remove_node(std::get<0>(edge));
+                        partition->remove_edge(std::get<0>(edge), std::get<1>(edge));
                         added_nodes.erase(std::remove(added_nodes.begin(), added_nodes.end(), std::get<0>(edge)), added_nodes.end());
                         break;
                     }
@@ -1334,19 +1335,19 @@ int Graph ::compute_gap(std::map<int, int> partition_weights)
     return max_weight - min_weight;
 }
 
-int compute_total_gap(std::vector<Graph>& partitions, std::map<int, int>& node_weights)
+int Graph :: compute_total_gap(std::vector<Graph*>& partitions, std::map<int, int>& node_weights)
 {
     int total_gap = 0;
     for (auto partition : partitions)
     {
         std::map<int, int> partition_weights;
-        std::vector<Node>  nodes = partition.get_nodes();
+        std::vector<Node>  nodes = partition->get_nodes();
         for (auto node : nodes)
         {
             partition_weights[node._id] = node._weight;
         }
 
-        total_gap += partition.compute_gap(partition_weights);
+        total_gap += partition->compute_gap(partition_weights);
     }
     return total_gap;
 }

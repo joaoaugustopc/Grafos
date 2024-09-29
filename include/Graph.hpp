@@ -70,9 +70,9 @@ private:
     std::vector<std::vector<float>> create_matrix();
     std::vector<std::vector<float>> create_path_matrix();
     //Procedimento Construtivo
-    std::vector<Graph> constructive_procedure(int p);
+    std::vector<Graph*> constructive_procedure(int p);
     std::vector<std::tuple<int, int>> get_crescent_gap_edges(std::vector<Graph>&partitions, std::vector<int>& nodes, std::map<int, int>&nodes_weight );
-    int compute_total_gap(std::vector<Graph>& partitions, std::map<int, int>& node_weights);
+    int compute_total_gap(std::vector<Graph*>& partitions, std::map<int, int>& node_weights);
     std::map<int, int> get_partition_weights(Graph& partition);
 
 };
