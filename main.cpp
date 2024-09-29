@@ -106,7 +106,12 @@ int main(int argc, char *argv[])
 
     std::cout << "Grafo carregado com sucesso" << std::endl;
 
-    graph->mggp(17);
+    time_t start, end;
+    time(&start);
+    graph->mggp(14);
+    time(&end);
+    double tempoexec = difftime(end, start);
+    std::cout << std::fixed << std::setprecision(2) << "Tempo de execucao: " << tempoexec << std::endl;
 
     /*
     int                 choice;
