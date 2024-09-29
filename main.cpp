@@ -104,6 +104,11 @@ int main(int argc, char *argv[])
 
     Graph *graph = new Graph(input, directed, weighted_edges, weighted_nodes);
 
+    std::cout << "Grafo carregado com sucesso" << std::endl;
+
+    graph->mggp(5);
+
+    /*
     int                 choice;
     std::vector<size_t> nodes;
     std::ofstream       kruscal;
@@ -371,6 +376,7 @@ int main(int argc, char *argv[])
     delete graph;
 
     output.close();
+    */
     /*
     */
     return 0;

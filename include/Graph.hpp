@@ -48,6 +48,8 @@ public:
                 int iteration,int l_in);
     std::vector<std::vector<int>> tabu_search(const std::vector<std::vector<int>>& adjList, const std::vector<int>& vertexWeights,
                                           const std::vector<std::vector<int>>& initial_partition, int max_iter, int l_min, int l_max);
+    
+    std::vector<std::vector<int>> create_adjacency_list();
 
 private:
     size_t _number_of_nodes;
@@ -74,7 +76,7 @@ private:
     std::vector<std::vector<float>> create_path_matrix();
     //Procedimento Construtivo
     std::vector<Graph*> constructive_procedure(int p);
-    std::vector<std::tuple<int, int>> get_crescent_gap_edges(std::vector<Graph>&partitions, std::vector<int>& nodes, std::map<int, int>&nodes_weight );
+    std::vector<std::tuple<int, int>> get_crescent_gap_edges(std::vector<int>& nodes, std::map<int, int>&nodes_weight );
     int compute_total_gap(std::vector<Graph*>& partitions, std::map<int, int>& node_weights);
     std::map<int, int> get_partition_weights(Graph& partition);
 
@@ -92,6 +94,8 @@ private:
     double compute_total_gap(const std::vector<std::vector<int>>& solution, const std::vector<int>& vertexWeights);
     void update_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, const std::tuple<int, int, int>& move,
                         int iteration);
+    
+
 };
 
 #endif  //GRAPH_HPP
