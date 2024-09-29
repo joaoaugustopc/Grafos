@@ -18,5 +18,6 @@
 #include <sstream>
 #include <cstdlib>
 #include <ctime>
+#include <unordered_set>
 
 #endif  //DEFINES_HPP
