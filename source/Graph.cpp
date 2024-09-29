@@ -719,6 +719,7 @@ std::vector<size_t> Graph::edsger_dijkstra(size_t node_id_1, size_t node_id_2)
         dist[node->_id]     = std::numeric_limits<float>::infinity();
         previous[node->_id] = (size_t)-1;  // Use size_t para representar o valor inválido
     }
+
     dist[node_id_1] = 0;
     queue.push({ 0, node_id_1 });
 
@@ -753,7 +754,7 @@ std::vector<size_t> Graph::edsger_dijkstra(size_t node_id_1, size_t node_id_2)
     }
     std::reverse(path.begin(), path.end());
 
-    if(path.size() == 1 && path[0] != node_id_1)
+    if (path.size() == 1 && path[0] != node_id_1)
     {
         path.clear();
     }
@@ -1062,44 +1063,50 @@ void Graph::new_read(std::ifstream& instance)
     }
 }
 
-
 // fauxs
-void initialize_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, int numVertices, int numSubgraphs)
+void Graph :: initialize_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, int numVertices, int numSubgraphs)
 {
     // Inicializa a matriz tabu com zeros
     for (int v = 0; v < numVertices; ++v)
+    {
+        for (int s = 0; s < numSubgraphs; ++s)
         {
-            for (int s = 0; s < numSubgraphs; ++s)
-                {
-                    tabuMatrix[v][s] = -std::numeric_limits<int>::max();
-                }
+            tabuMatrix[v][s] = -std::numeric_limits<int>::max();
         }
+    }
 }
 
-bool is_articulation_vertex(int v, const std::vector<int>& subgraph, const std::vector<std::vector<int>>& adjList) {
+bool Graph :: is_articulation_vertex(int v, const std::vector<int>& subgraph, const std::vector<std::vector<int>>& adjList)
+{
     // Criar um conjunto dos vértices do subgrafo sem o vértice v
     std::unordered_set<int> subgraph_set(subgraph.begin(), subgraph.end());
     subgraph_set.erase(v);
 
-    if (subgraph_set.size() < 2) {
+    if (subgraph_set.size() < 2)
+    {
         return false;
     }
 
     // Iniciar DFS a partir de um vértice qualquer do subgrafo
-    int start_vertex = *subgraph_set.begin();
+    int                     start_vertex = *subgraph_set.begin();
     std::unordered_set<int> visited;
-    std::stack<int> stack;
+    std::stack<int>         stack;
     stack.push(start_vertex);
     visited.insert(start_vertex);
 
-    while (!stack.empty()) {
+    while (!stack.empty())
+    {
         int current = stack.top();
         stack.pop();
 
-        for (int neighbor : adjList[current]) {
-            if (neighbor == v) continue;
-            if (subgraph_set.find(neighbor) != subgraph_set.end()) {
-                if (visited.find(neighbor) == visited.end()) {
+        for (int neighbor : adjList[current])
+        {
+            if (neighbor == v)
+                continue;
+            if (subgraph_set.find(neighbor) != subgraph_set.end())
+            {
+                if (visited.find(neighbor) == visited.end())
+                {
                     visited.insert(neighbor);
                     stack.push(neighbor);
                 }
@@ -1111,23 +1118,23 @@ bool is_articulation_vertex(int v, const std::vector<int>& subgraph, const std::
     return visited.size() != subgraph_set.size();
 }
 
-std::vector<std::tuple<int, int, int>> generate_neighborhood(
-    const std::vector<std::vector<int>>& adjList,
-    const std::vector<std::vector<int>>& current_solution)
+std::vector<std::tuple<int, int, int>> Graph :: generate_neighborhood(const std::vector<std::vector<int>>& adjList, const std::vector<std::vector<int>>& current_solution)
 {
     std::vector<std::tuple<int, int, int>> moves;
-    int numSubgraphs = current_solution.size();
+    int                                    numSubgraphs = current_solution.size();
 
-    for (int s_from = 0; s_from < numSubgraphs; ++s_from) {
+    for (int s_from = 0; s_from < numSubgraphs; ++s_from)
+    {
         const auto& subgraph_from = current_solution[s_from];
         for (int v : subgraph_from)
         {
             // Encontrar subgrafos adjacentes
             for (int s_to = 0; s_to < numSubgraphs; ++s_to)
             {
-                if (s_to == s_from) continue;
+                if (s_to == s_from)
+                    continue;
                 const auto& subgraph_to = current_solution[s_to];
-                bool is_adjacent = false;
+                bool        is_adjacent = false;
                 for (int u : subgraph_to)
                 {
                     if (std::find(adjList[v].begin(), adjList[v].end(), u) != adjList[v].end())
@@ -1154,39 +1161,35 @@ std::vector<std::tuple<int, int, int>> generate_neighborhood(
     return moves;
 }
 
-
-bool is_tabu(const std::tuple<int, int, int>& move, const std::map<int, std::map<int, int>>& tabuMatrix,
-            int iteration,int l_in)
+bool Graph :: is_tabu(const std::tuple<int, int, int>& move, const std::map<int, std::map<int, int>>& tabuMatrix, int iteration, int l_in)
 {
-    int v = std::get<0>(move);
+    int v    = std::get<0>(move);
     int s_to = std::get<2>(move);
 
-    if (tabuMatrix.at(v).at(s_to) + l_in > iteration) {
-        return true; // Movimento tabu
+    if (tabuMatrix.at(v).at(s_to) + l_in > iteration)
+    {
+        return true;  // Movimento tabu
     }
-    return false; // Movimento permitido
+    return false;  // Movimento permitido
 }
 
-
-void evaluate_moves(const std::vector<std::tuple<int, int, int>>& neighborhood_moves,
-const std::vector<std::vector<int>>& current_solution, const std::map<int, std::map<int, int>>& tabuMatrix,
-int iteration, int l_in, const std::vector<std::vector<int>>& best_solution, std::tuple<int, int,int>& best_move,
-double& best_gap, const std::vector<int>& vertexWeights)
+void Graph :: evaluate_moves(const std::vector<std::tuple<int, int, int>>& neighborhood_moves, const std::vector<std::vector<int>>& current_solution,
+                    const std::map<int, std::map<int, int>>& tabuMatrix, int iteration, int l_in, const std::vector<std::vector<int>>& best_solution,
+                    std::tuple<int, int, int>& best_move, double& best_gap, const std::vector<int>& vertexWeights)
 {
     double aspiration_value = compute_total_gap(best_solution, vertexWeights);
 
     for (const auto& move : neighborhood_moves)
     {
-        int v = std::get<0>(move);
+        int v      = std::get<0>(move);
         int s_from = std::get<1>(move);
-        int s_to = std::get<2>(move);
+        int s_to   = std::get<2>(move);
 
         bool tabu = is_tabu(move, tabuMatrix, iteration, l_in);
 
         std::vector<std::vector<int>> new_solution = current_solution;
 
-        new_solution[s_from].erase(std::remove(new_solution[s_from].begin(), new_solution[s_from].end(), v),
-                                   new_solution[s_from].end());
+        new_solution[s_from].erase(std::remove(new_solution[s_from].begin(), new_solution[s_from].end(), v), new_solution[s_from].end());
         new_solution[s_to].push_back(v);
 
         double total_gap = compute_total_gap(new_solution, vertexWeights);
@@ -1197,28 +1200,26 @@ double& best_gap, const std::vector<int>& vertexWeights)
             if (total_gap < best_gap)
             {
                 best_move = move;
-                best_gap = total_gap;
+                best_gap  = total_gap;
             }
         }
     }
 }
 
-
-void apply_move(const std::tuple<int, int, int>& move, std::vector<std::vector<int>>& current_solution)
+void Graph :: apply_move(const std::tuple<int, int, int>& move, std::vector<std::vector<int>>& current_solution)
 {
-    int v = std::get<0>(move);
+    int v      = std::get<0>(move);
     int s_from = std::get<1>(move);
-    int s_to = std::get<2>(move);
+    int s_to   = std::get<2>(move);
 
     // Remove o vértice do subgrafo de origem
-    current_solution[s_from].erase(std::remove(current_solution[s_from].begin(), current_solution[s_from].end(),v),
-                                   current_solution[s_from].end());
+    current_solution[s_from].erase(std::remove(current_solution[s_from].begin(), current_solution[s_from].end(), v), current_solution[s_from].end());
 
     // Adiciona o vértice ao subgrafo de destino
     current_solution[s_to].push_back(v);
 }
 
-double compute_total_gap(const std::vector<std::vector<int>>& solution, const std::vector<int>& vertexWeights)
+double Graph :: compute_total_gap(const std::vector<std::vector<int>>& solution, const std::vector<int>& vertexWeights)
 {
     double total_gap = 0.0;
     for (const auto& subgraph : solution)
@@ -1230,8 +1231,10 @@ double compute_total_gap(const std::vector<std::vector<int>>& solution, const st
             for (int v : subgraph)
             {
                 int weight = vertexWeights[v];
-                if (weight > max_weight) max_weight = weight;
-                if (weight < min_weight) min_weight = weight;
+                if (weight > max_weight)
+                    max_weight = weight;
+                if (weight < min_weight)
+                    min_weight = weight;
             }
             total_gap += (max_weight - min_weight);
         }
@@ -1239,30 +1242,27 @@ double compute_total_gap(const std::vector<std::vector<int>>& solution, const st
     return total_gap;
 }
 
-void update_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, const std::tuple<int, int, int>& move,
-                        int iteration)
+void Graph :: update_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, const std::tuple<int, int, int>& move, int iteration)
 {
-    int v = std::get<0>(move);
+    int v    = std::get<0>(move);
     int s_to = std::get<2>(move);
 
     // Atualiza a tabu
     tabuMatrix[v][s_to] = iteration;
 }
 
-
 //Finalmente a função Tabu Search!!
-std::vector<std::vector<int>> tabu_search(const std::vector<std::vector<int>>& adjList,
-const std::vector<int>& vertexWeights, const std::vector<std::vector<int>>& initial_partition, int max_iter,
-int l_min, int l_max)
+std::vector<std::vector<int>> Graph :: tabu_search(const std::vector<std::vector<int>>& adjList, const std::vector<int>& vertexWeights,
+                                          const std::vector<std::vector<int>>& initial_partition, int max_iter, int l_min, int l_max)
 {
     // Solução inicial
-    std::vector<std::vector<int>> current_solution = initial_partition;
-    std::vector<std::vector<int>> best_solution = current_solution;
+    std::vector<std::vector<int>>     current_solution = initial_partition;
+    std::vector<std::vector<int>>     best_solution    = current_solution;
     std::map<int, std::map<int, int>> tabuMatrix;
-    int numVertices = vertexWeights.size();
-    int numSubgraphs = current_solution.size();
+    int                               numVertices  = vertexWeights.size();
+    int                               numSubgraphs = current_solution.size();
     initialize_tabu_matrix(tabuMatrix, numVertices, numSubgraphs);
-    int l_in = l_max;
+    int    l_in                  = l_max;
     double previous_solution_gap = compute_total_gap(current_solution, vertexWeights);
 
     for (int iteration = 0; iteration < max_iter; ++iteration)
@@ -1272,10 +1272,9 @@ int l_min, int l_max)
 
         // Avaliar cada movimento
         std::tuple<int, int, int> best_move(-1, -1, -1);
-        double best_gap = std::numeric_limits<double>::max();
+        double                    best_gap = std::numeric_limits<double>::max();
 
-        evaluate_moves(neighborhood_moves, current_solution, tabuMatrix, iteration, l_in, best_solution,
-                       best_move, best_gap, vertexWeights);
+        evaluate_moves(neighborhood_moves, current_solution, tabuMatrix, iteration, l_in, best_solution, best_move, best_gap, vertexWeights);
 
         // Verifica se um movimento válido foi encontrado
         if (std::get<0>(best_move) == -1)
@@ -1299,10 +1298,11 @@ int l_min, int l_max)
 
         if (current_solution_gap < previous_solution_gap)
         {
-            l_in = std::max(l_in - 1, l_min); // Se houve melhoria, intensificar a busca
-        } else
+            l_in = std::max(l_in - 1, l_min);  // Se houve melhoria, intensificar a busca
+        }
+        else
         {
-            l_in = std::min(l_in + 1, l_max); // Caso contrário, diversificar a busca
+            l_in = std::min(l_in + 1, l_max);  // Caso contrário, diversificar a busca
         }
         previous_solution_gap = current_solution_gap;
     }
