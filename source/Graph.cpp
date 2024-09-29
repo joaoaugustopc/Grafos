@@ -1070,9 +1070,9 @@ std::vector<int> Graph::findArticulationPoints()
 void Graph ::initialize_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, int numVertices, int numSubgraphs)
 {
     // Inicializa a matriz tabu com zeros
-    for (int v = 0; v < numVertices; ++v)
+    for (int v = 0; v < numVertices + 1; ++v)
     {
-        for (int s = 0; s < numSubgraphs; ++s)
+        for (int s = 0; s < numSubgraphs + 1; ++s)
         {
             tabuMatrix[v][s] = -std::numeric_limits<int>::max();
         }
@@ -1272,14 +1272,18 @@ std::vector<std::vector<int>> Graph ::tabu_search(const std::vector<std::vector<
 
     for (int iteration = 0; iteration < max_iter; ++iteration)
     {
+        std::cout << "Iteração " << iteration << std::endl;
         // Explorar a vizinhança
         std::vector<std::tuple<int, int, int>> neighborhood_moves = generate_neighborhood(adjList, current_solution);
+
+        std::cout << "teste1" << std::endl;
 
         // Avaliar cada movimento
         std::tuple<int, int, int> best_move(-1, -1, -1);
         double                    best_gap = std::numeric_limits<double>::max();
 
         evaluate_moves(neighborhood_moves, current_solution, tabuMatrix, iteration, l_in, best_solution, best_move, best_gap, vertexWeights);
+        std::cout << "teste2" << std::endl;
 
         // Verifica se um movimento válido foi encontrado
         if (std::get<0>(best_move) == -1)
@@ -1293,6 +1297,7 @@ std::vector<std::vector<int>> Graph ::tabu_search(const std::vector<std::vector<
 
         // Atualizar a matriz tabu
         update_tabu_matrix(tabuMatrix, best_move, iteration);
+        std::cout << "teste3" << std::endl;
 
         // Atualizar a melhor solução
         double current_solution_gap = compute_total_gap(current_solution, vertexWeights);
@@ -1317,8 +1322,83 @@ std::vector<std::vector<int>> Graph ::tabu_search(const std::vector<std::vector<
 
 void Graph ::mggp(int p)
 {
+    std::cout << "Executando o algoritmo MGGP com p = " << p << std::endl;
+
+    // Correção na declaração de 'solution'
+    std::vector<Graph *> solution = constructive_procedure(p);
+
+    for (Graph *partition : solution)
+    {
+        std::cout << "Subgrafo: ";
+        for (Node *node = partition->_first; node != nullptr; node = node->_next_node)
+        {
+            std::cout << node->_id << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::vector<int> vertexWeights(this->_number_of_nodes + 1, 0);
+    std::cout << "1" << std::endl;
+
+    // Correção na iteração dos nós
+    for (Node *node = this->_first; node != nullptr; node = node->_next_node)
+    {
+        vertexWeights[node->_id] = node->_weight;
+    }
+
+    std::vector<std::vector<int>> initial_partition;
+
+    std::cout << "2" << std::endl;
+
+    // Correção no loop sobre 'solution'
+    for (Graph *partition : solution)
+    {
+        std::vector<int> subgraph;
+
+        std::vector<Node> nodes = partition->get_nodes();
+
+        for (Node node : nodes)
+        {
+            std::cout << "Node: " << node._id << std::endl;
+            subgraph.push_back(node._id);
+        }
+
+        initial_partition.push_back(subgraph);
+    }
+
+    std::cout << "3" << std::endl;
+    std::vector<std::vector<int>> adjList = create_adjacency_list();
+
+    std::cout << "4" << std::endl;
+
+    std::vector<std::vector<int>> best_solution = tabu_search(adjList, vertexWeights, initial_partition, 1000, 5, 10);
+
+    std::cout << "Solução final encontrada" << std::endl;
+
+    std::cout << "Melhor solução encontrada: " << std::endl;
+    for (int i = 0; i < best_solution.size(); ++i)
+    {
+        std::cout << "Subgrafo " << i + 1 << ": ";
+        for (int v : best_solution[i])
+        {
+            std::cout << v << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "Gap total: " << compute_total_gap(best_solution, vertexWeights) << std::endl;
+
+    // Deletar partições alocadas
+    for (Graph *partition : solution)
+    {
+        delete partition;
+    }
+    /*
+    /*
+    std::cout << "Executando o algoritmo MGGP com p = " << p << std::endl;
     std::vector<Graph*> solution = constructive_procedure(p);
     std::vector<int>     vertexWeights(this->_number_of_nodes, 0);
+    std::cout << "1" << std::endl;
     for (Node* node = this->_first; node != nullptr; node = node->_next_node)
     {
         vertexWeights[node->_id] = node->_weight;
@@ -1326,8 +1406,11 @@ void Graph ::mggp(int p)
 
     std::vector<std::vector<int>> initial_partition;
 
-    for (Graph* partition : solution)
+    std::cout << "2" << std::endl;
+    
+    for (auto partition : solution)
     {
+        std::cout << "2.1" << std::endl;
         std::vector<int> subgraph;
         for (Node* node = partition->_first; node != nullptr; node = node->_next_node)
         {
@@ -1336,9 +1419,14 @@ void Graph ::mggp(int p)
         initial_partition.push_back(subgraph);
     }
 
+    std::cout << "3" << std::endl;
     std::vector<std::vector<int>> adjList = create_adjacency_list();
 
+    std::cout << "4" << std::endl;
+
     std::vector<std::vector<int>> best_solution = tabu_search(adjList, vertexWeights, initial_partition, 1000, 5, 10);
+
+    std::cout << "Solução final encontrada" << std::endl;   
 
     std::cout << "Melhor solução encontrada: " << std::endl;
     for (int i = 0; i < best_solution.size(); ++i)
@@ -1357,7 +1445,7 @@ void Graph ::mggp(int p)
     {
         delete partition;
     }
-
+    */
 }
 
 // begin: Construção de Soluções
@@ -1366,6 +1454,7 @@ std::vector<std::tuple<int, int>> Graph ::get_crescent_gap_edges(std::vector<int
 {
     //Ordenar as arestas em ordem crescente de gap e armazenar em um vetor
     std::vector<std::tuple<int, int>> edges;
+    std::set<std::pair<int, int>>     seen_edges;
     for (Node *node = this->_first; node != nullptr; node = node->_next_node)
     {
         nodes.push_back(node->_id);
@@ -1374,7 +1463,20 @@ std::vector<std::tuple<int, int>> Graph ::get_crescent_gap_edges(std::vector<int
         Edge *edge = node->_first_edge;
         while (edge != nullptr)
         {
-            edges.push_back({ node->_id, edge->_target_id });
+            int u = node->_id;
+            int v = edge->_target_id;
+
+            // Garantir que a aresta seja sempre representada como (menor, maior)
+            if (u > v)
+                std::swap(u, v);
+
+            // Verifique se essa aresta já foi inserida
+            if (seen_edges.find({ u, v }) == seen_edges.end())
+            {
+                edges.push_back({ u, v });
+                seen_edges.insert({ u, v });  // Marcar a aresta como processada
+            }
+
             edge = edge->_next_edge;
         }
     }
@@ -1382,7 +1484,8 @@ std::vector<std::tuple<int, int>> Graph ::get_crescent_gap_edges(std::vector<int
     //Ordenar as arestas em ordem crescente de gap | w(u) - w(v) |
     std::sort(edges.begin(),
               edges.end(),
-              [&](const std::tuple<int, int>& a, const std::tuple<int, int>& b) {
+              [&](const std::tuple<int, int>& a, const std::tuple<int, int>& b)
+              {
                   return std::abs(nodes_weight.at(std::get<0>(a)) - nodes_weight.at(std::get<1>(a))) <
                          std::abs(nodes_weight.at(std::get<0>(b)) - nodes_weight.at(std::get<1>(b)));
               });
@@ -1392,8 +1495,8 @@ std::vector<std::tuple<int, int>> Graph ::get_crescent_gap_edges(std::vector<int
 
 std::vector<Graph *> Graph ::constructive_procedure(int p)
 {
+    std::cout << "Executando o procedimento construtivo com p = " << p << std::endl;
     //Vetor de Subgrafos (Partições)
-    std::vector<Graph> partitions;
     std::vector<int>   nodes;
     std::map<int, int> nodes_weight;  // Mapa de pesos dos vértices (chave: id do vértice, valor: peso do vértice)
 
@@ -1404,17 +1507,20 @@ std::vector<Graph *> Graph ::constructive_procedure(int p)
     std::vector<Graph *> X;
     std::vector<int>     added_nodes;  // Conjunto de vértices adicionados a alguma partição
 
+    int edge_index = 0;
+    int i          = 0;
     // Inicializar as partições
-    for (int i = 0; i < p; i++)
+    while (X.size() < p && edge_index < edges.size())
     {
         // extrai a primeira aresta de edges (O menor gap)
-        std::tuple<int, int> edge = edges[0];
-        edges.erase(edges.begin());
+        std::tuple<int, int> edge = edges[edge_index++];
 
         // Verificar se algum vertice da aresta não é adjacente a nenhuma partição
         if (std::find(added_nodes.begin(), added_nodes.end(), std::get<0>(edge)) == added_nodes.end() &&
             std::find(added_nodes.begin(), added_nodes.end(), std::get<1>(edge)) == added_nodes.end())
         {
+            std::cout << "Criando particao " << i << std::endl;
+            i = i + 1;
             // Criar uma nova partição
             Graph *partition = new Graph(this->_directed, this->_weighted_edges, this->_weighted_nodes);
             partition->add_node(std::get<0>(edge), nodes_weight[std::get<0>(edge)]);
@@ -1426,16 +1532,30 @@ std::vector<Graph *> Graph ::constructive_procedure(int p)
         }
     }
 
+    for (auto partition : X)
+    {
+        std::cout << "Partição: ";
+        for (Node *node = partition->_first; node != nullptr; node = node->_next_node)
+        {
+            std::cout << node->_id << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "Partições iniciais criadas" << std::endl;
+
     //Expandir os subconjuntos até que todos os vértices estejam em uma partição
     while (added_nodes.size() < this->_number_of_nodes)
     {
+        std::cout << "Adicionando vértices às partições:" << std::endl;
         int                  melhor_gap = std::numeric_limits<int>::max();
         std::tuple<int, int> best_move;
-        Graph*               target_partition = nullptr;
+        Graph               *target_partition = nullptr;
 
         //para cada edge [i,j] em E tal que [i,j] conecta um vértice de X com um vértice fora de X
         for (auto& edge : edges)
         {
+            //std::cout << "Adicionando vértice " << std::get<0>(edge) << " ou " << std::get<1>(edge) << " às partições" << std::endl;
             bool v_in = std::find(added_nodes.begin(), added_nodes.end(), std::get<0>(edge)) != added_nodes.end();
             bool u_in = std::find(added_nodes.begin(), added_nodes.end(), std::get<1>(edge)) != added_nodes.end();
 
@@ -1456,9 +1576,9 @@ std::vector<Graph *> Graph ::constructive_procedure(int p)
                         //Verificar se o gap é melhor
                         if (gap < melhor_gap)
                         {
-                            melhor_gap        = gap;
-                            best_move         = edge;
-                            target_partition  = partition;
+                            melhor_gap       = gap;
+                            best_move        = edge;
+                            target_partition = partition;
                         }
 
                         //Remover nó adicionado
@@ -1469,6 +1589,8 @@ std::vector<Graph *> Graph ::constructive_procedure(int p)
             }
         }
 
+        std::cout << "Melhor gap encontrado: " << melhor_gap << std::endl;
+
         //Aplicar o melhor movimento encontrado
         int v = target_partition->find_node(std::get<0>(best_move)) ? std::get<0>(best_move) : std::get<1>(best_move);
         int u = v == std::get<0>(best_move) ? std::get<1>(best_move) : std::get<0>(best_move);
@@ -1478,6 +1600,7 @@ std::vector<Graph *> Graph ::constructive_procedure(int p)
         added_nodes.push_back(u);
     }
 
+    std::cout << "SAIU" << std::endl;
     return X;
 }
 
@@ -1541,15 +1664,20 @@ std::map<int, int> Graph ::get_partition_weights(Graph& partition)
     return partition_weights;
 }
 
-
-std::vector<std::vector<int>> Graph::create_adjacency_list() {
-    std::vector<std::vector<int>> adjList(this->_number_of_nodes);
-    for (Node *node = this->_first; node != nullptr; node = node->_next_node) {
+std::vector<std::vector<int>> Graph::create_adjacency_list()
+{
+    std::cout << "Criando lista de adjacência" << std::endl;
+    std::vector<std::vector<int>> adjList(this->_number_of_nodes + 1);
+    for (Node *node = this->_first; node != nullptr; node = node->_next_node)
+    {
         Edge *edge = node->_first_edge;
-        while (edge != nullptr) {
+        while (edge != nullptr)
+        {
             adjList[node->_id].push_back(edge->_target_id);
             edge = edge->_next_edge;
         }
     }
+
+    std::cout << "Lista de adjacência criada" << std::endl;
     return adjList;
 }

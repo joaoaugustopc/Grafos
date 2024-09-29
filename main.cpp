@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 
     std::cout << "Grafo carregado com sucesso" << std::endl;
 
-    graph->mggp(5);
+    graph->mggp(17);
 
     /*
     int                 choice;
