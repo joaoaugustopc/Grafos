@@ -1535,3 +1535,125 @@ std::map<int, int> Graph :: get_partition_weights(Graph& partition){
     }
     return partition_weights;
 }
+
+double Graph::compute_total_gap(const std::vector<std::vector<int>>& partitions, const std::map<int, float>& node_weights)
+{
+    double total_gap = 0.0;
+
+    for (const auto& partition : partitions)
+    {
+        if (partition.size() >= 2)
+        {
+            float max_weight = std::numeric_limits<float>::min();
+            float min_weight = std::numeric_limits<float>::max();
+
+            for (int node_id : partition)
+            {
+                float weight = node_weights.at(node_id);
+                if (weight > max_weight) max_weight = weight;
+                if (weight < min_weight) min_weight = weight;
+            }
+
+            total_gap += (max_weight - min_weight);
+        }
+        else
+        {
+            // Penalizar partições com menos de dois nós
+            total_gap += std::numeric_limits<float>::max();
+        }
+    }
+
+    return total_gap;
+}
+
+bool Graph::is_connected_subgraph(const std::vector<int>& subgraph_nodes)
+{
+    if (subgraph_nodes.size() < 2)
+        return false;
+
+    std::unordered_set<int> visited;
+    std::queue<int> q;
+    q.push(subgraph_nodes[0]);
+    visited.insert(subgraph_nodes[0]);
+
+    while (!q.empty())
+    {
+        int current = q.front();
+        q.pop();
+
+        Node* node = find_node(current);
+        Edge* edge = node->_first_edge;
+
+        while (edge != nullptr)
+        {
+            int neighbor_id = edge->_target_id;
+
+            if (std::find(subgraph_nodes.begin(), subgraph_nodes.end(), neighbor_id) != subgraph_nodes.end())
+            {
+                if (visited.find(neighbor_id) == visited.end())
+                {
+                    visited.insert(neighbor_id);
+                    q.push(neighbor_id);
+                }
+            }
+            edge = edge->_next_edge;
+        }
+    }
+
+    return visited.size() == subgraph_nodes.size();
+}
+
+void Graph::local_search(std::vector<std::vector<int>>& partitions, const std::map<int, float>& node_weights)
+{
+    bool improved = true;
+
+    while (improved)
+    {
+        improved = false;
+
+        // Para cada partição
+        for (size_t i = 0; i < partitions.size(); ++i)
+        {
+            // Tentar mover um nó para outra partição
+            for (size_t j = 0; j < partitions.size(); ++j)
+            {
+                if (i == j) continue;
+
+                for (int node_id : partitions[i])
+                {
+                    // Verificar se a remoção do nó não desconecta a partição
+                    if (can_remove_node(partitions[i], node_id))
+                    {
+                        // Verificar se a adição do nó à partição j mantém a conectividade
+                        if (can_add_node(partitions[j], node_id))
+                        {
+                            // Calcular o gap atual e o novo gap se a mudança for feita
+                            double current_gap = compute_total_gap(partitions, node_weights);
+
+                            // Realizar a mudança
+                            partitions[i].erase(std::remove(partitions[i].begin(), partitions[i].end(), node_id), partitions[i].end());
+                            partitions[j].push_back(node_id);
+
+                            double new_gap = compute_total_gap(partitions, node_weights);
+
+                            if (new_gap < current_gap)
+                            {
+                                improved = true;
+                                break;
+                            }
+                            else
+                            {
+                                // Reverter a mudança
+                                partitions[j].pop_back();
+                                partitions[i].push_back(node_id);
+                            }
+                        }
+                    }
+                }
+                if (improved) break;
+            }
+            if (improved) break;
+        }
+    }
+}
+
