@@ -16,5 +16,8 @@
 #include <tuple>
 #include <limits>
 #include <sstream>
+#include <cstdlib>
+#include <ctime>
+#include <unordered_set>
 
 #endif  //DEFINES_HPP

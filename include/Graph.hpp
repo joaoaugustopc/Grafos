@@ -3,7 +3,6 @@
 
 #include "Node.hpp"
 #include "defines.hpp"
-#include <sstream>
 
 class Graph
 {
@@ -45,6 +44,10 @@ public:
     void new_read(std::ifstream& instance);
     void mggp(int p);
     int compute_gap(std::map<int, int> partition_weights);
+    bool is_tabu(const std::tuple<int, int, int>& move, const std::map<int, std::map<int, int>>& tabuMatrix,
+                int iteration,int l_in);
+    std::vector<std::vector<int>> tabu_search(const std::vector<std::vector<int>>& adjList, const std::vector<int>& vertexWeights,
+                                          const std::vector<std::vector<int>>& initial_partition, int max_iter, int l_min, int l_max);
 
 private:
     size_t _number_of_nodes;
@@ -75,6 +78,20 @@ private:
     int compute_total_gap(std::vector<Graph*>& partitions, std::map<int, int>& node_weights);
     std::map<int, int> get_partition_weights(Graph& partition);
 
+
+
+    void initialize_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, int numVertices, int numSubgraphs);
+    bool is_articulation_vertex(int v, const std::vector<int>& subgraph, const std::vector<std::vector<int>>& adjList);
+    std::vector<std::tuple<int, int, int>> generate_neighborhood(const std::vector<std::vector<int>>& adjList,
+                                                            const std::vector<std::vector<int>>& current_solution);
+    void evaluate_moves(const std::vector<std::tuple<int, int, int>>& neighborhood_moves,
+    const std::vector<std::vector<int>>& current_solution, const std::map<int, std::map<int, int>>& tabuMatrix,
+    int iteration, int l_in, const std::vector<std::vector<int>>& best_solution, std::tuple<int, int,int>& best_move,
+    double& best_gap, const std::vector<int>& vertexWeights);
+    void apply_move(const std::tuple<int, int, int>& move, std::vector<std::vector<int>>& current_solution);
+    double compute_total_gap(const std::vector<std::vector<int>>& solution, const std::vector<int>& vertexWeights);
+    void update_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, const std::tuple<int, int, int>& move,
+                        int iteration);
 };
 
 #endif  //GRAPH_HPP
