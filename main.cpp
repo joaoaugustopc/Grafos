@@ -1,4 +1,4 @@
-#include "include/Graph.hpp"
+#include "source/Graph.cpp"
 
 void clear_screen()
 {
@@ -83,6 +83,13 @@ void saveGraphToFile(Graph *graph, const std::string& filename)
 
 int main(int argc, char *argv[])
 {
+    Graph *graph = new Graph(false, false, false);
+
+    std::ifstream input("n100d03p2i4.txt");
+
+    graph->new_read(input);
+
+    /*
     if (argc < 5)
     {
         std::cerr << "Uso: " << argv[0] << " <nome_da_instancia>" << std::endl;
@@ -370,5 +377,6 @@ int main(int argc, char *argv[])
     delete graph;
 
     output.close();
+    */
     return 0;
 }
