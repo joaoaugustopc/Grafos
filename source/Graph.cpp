@@ -1067,102 +1067,6 @@ std::vector<int> Graph::findArticulationPoints()
     return articulationPoints;
 }
 
-void Graph::new_read(std::ifstream& instance)
-{
-    int                              p, num_nodes;
-    std::vector<int>                 nodes;
-    std::map<int, int>               nodes_weight;
-    std::vector<std::pair<int, int>> edges;
-    std::string                      skip;
-    std::string                      line;
-
-    while (std::getline(instance, line))
-    {
-        if (line.find("param p := ") != std::string::npos)
-        {
-            std::stringstream ss(line);
-            ss >> skip >> skip >> skip >> p;
-            std::cout << "Particoes: " << p << std::endl;
-        }
-
-        if (line.find("vertici") != std::string::npos)
-        {
-            std::stringstream ss(line);
-            ss >> skip >> num_nodes;
-            std::cout << "Numero de vertices: " << num_nodes << std::endl;
-        }
-
-        if (line.find("set V :=") != std::string::npos)
-        {
-            while (std::getline(instance, line))
-            {
-                //std::cout << line << std::endl;
-                std::stringstream ss(line);
-
-                while (ss >> skip)
-                {
-                    nodes.push_back(std::stoi(skip));
-                }
-            }
-        }
-
-        if (line.find("param w :=") != std::string::npos)
-        {
-            while (std::getline(instance, line))
-            {
-                if (line.find(";") != std::string::npos)
-                {
-                    break;
-                }
-                std::stringstream ss(line);
-                int               u, w;
-                ss >> u >> w;
-                nodes_weight[u] = w;
-            }
-        }
-
-        if (line.find("set E :=") != std::string::npos)
-        {
-            while (std::getline(instance, line))
-            {
-                if (line.find(";") != std::string::npos)
-                {
-                    break;
-                }
-                std::stringstream ss(line);
-                char              ignore;
-                int               u, v;
-                while (ss >> ignore >> u >> ignore >> v >> ignore)
-                {
-                    edges.push_back({ u, v });
-                }
-            }
-        }
-    }
-
-    for (auto i : nodes)
-    {
-        std::cout << i << " ";
-    }
-
-    std::cout << std::endl;
-
-    for (auto i : nodes_weight)
-    {
-        std::cout << i.first << " " << i.second << std::endl;
-    }
-
-    for (auto i : edges)
-    {
-        std::cout << i.first << " " << i.second << std::endl;
-    }
-    return partition_weights;
-}
-
-
-
-
-
 
 // fauxs
 void Graph :: initialize_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, int numVertices, int numSubgraphs)
@@ -1409,4 +1313,225 @@ std::vector<std::vector<int>> Graph :: tabu_search(const std::vector<std::vector
     }
 
     return best_solution;
+}
+
+void Graph ::mggp(int p)
+{
+    constructive_procedure(p);
+}
+
+// begin: Construção de Soluções
+
+std::vector<std::tuple<int, int>> Graph ::get_crescent_gap_edges(std::vector<Graph>& partitions, std::vector<int>& nodes, std::map<int, int>& nodes_weight)
+{
+    //Ordenar as arestas em ordem crescente de gap e armazenar em um vetor
+    std::vector<std::tuple<int, int>> edges;
+    for (Node *node = this->_first; node != nullptr; node = node->_next_node)
+    {
+        nodes.push_back(node->_id);
+        nodes_weight[node->_id] = node->_weight;
+        
+        Edge *edge = node->_first_edge;
+        while (edge != nullptr)
+        {
+            edges.push_back({ node->_id, edge->_target_id });
+            edge = edge->_next_edge;
+        }
+    }
+
+    //Ordenar as arestas em ordem crescente de gap | w(u) - w(v) |
+    std::sort(edges.begin(),
+              edges.end(),
+              [&](std::tuple<int, int> a, std::tuple<int, int> b) {
+                  return std::abs(nodes_weight[std::get<0>(a)] - nodes_weight[std::get<1>(a)]) <
+                         std::abs(nodes_weight[std::get<0>(b)] - nodes_weight[std::get<1>(b)]);
+              });
+
+    return edges;
+}
+
+std::vector<Graph*> Graph ::constructive_procedure(int p)
+{
+    //Vetor de Subgrafos (Partições)
+    std::vector<Graph> partitions;
+    std::vector<int>   nodes;
+    std::map<int, int> nodes_weight; // Mapa de pesos dos vértices (chave: id do vértice, valor: peso do vértice)
+
+    std::vector<std::tuple<int, int>> edges = get_crescent_gap_edges(partitions, nodes, nodes_weight);
+
+    // Inicializar o conjunto de partições
+    //Conjunto Solução
+    std::vector<Graph*> X;
+    std::vector<int>   added_nodes;  // Conjunto de vértices adicionados a alguma partição
+
+    // Inicializar as partições
+    for (int i = 0; i < p; i++)
+    {
+        // extrai a primeira aresta de edges (O menor gap)
+        std::tuple<int, int> edge = edges[0];
+        edges.erase(edges.begin());
+
+        // Verificar se algum vertice da aresta não é adjacente a nenhuma partição
+        if (std::find(added_nodes.begin(), added_nodes.end(), std::get<0>(edge)) == added_nodes.end() &&
+            std::find(added_nodes.begin(), added_nodes.end(), std::get<1>(edge)) == added_nodes.end())
+        {
+            // Criar uma nova partição
+            Graph* partition = new Graph(this->_directed, this->_weighted_edges, this->_weighted_nodes);
+            partition->add_node(std::get<0>(edge), nodes_weight[std::get<0>(edge)]);
+            partition->add_node(std::get<1>(edge), nodes_weight[std::get<1>(edge)]);
+            partition->add_edge(std::get<0>(edge), std::get<1>(edge), 1);
+            X.push_back(partition);
+            added_nodes.push_back(std::get<0>(edge));
+            added_nodes.push_back(std::get<1>(edge));
+        }
+    }
+
+    //Expandir os subconjuntos até que todos os vértices estejam em uma partição
+    while (added_nodes.size() < this->_number_of_nodes)
+    {
+        int                  melhor_gap = std::numeric_limits<int>::max();
+        std::tuple<int, int> current_edge;
+
+        //para cada edge [i,j] em E tal que [i,j] conecta um vértice de X com um vértice fora de X
+        for (auto edge : edges)
+        {
+            if (std::find(added_nodes.begin(), added_nodes.end(), std::get<0>(edge)) != added_nodes.end() &&
+                std::find(added_nodes.begin(), added_nodes.end(), std::get<1>(edge)) == added_nodes.end())
+            {
+                //Juntar o vértice j a partição que contém o vértice i
+                for (auto partition : X)
+                {
+                    if (partition->find_node(std::get<0>(edge)) != nullptr)
+                    {
+                        partition->add_node(std::get<1>(edge), nodes_weight[std::get<1>(edge)]);
+                        partition->add_edge(std::get<0>(edge), std::get<1>(edge), 1);
+                        added_nodes.push_back(std::get<1>(edge));
+                        break;
+                    }
+                }
+
+                int gap = compute_total_gap(X, nodes_weight);
+
+                if (gap < melhor_gap)
+                {
+                    melhor_gap   = gap;
+                }
+                else{
+
+                for (auto partition : X)
+                {
+                    if (partition->find_node(std::get<1>(edge)) != nullptr)
+                    {
+                        partition->remove_node(std::get<1>(edge));
+                        partition->remove_edge(std::get<0>(edge), std::get<1>(edge));
+                        added_nodes.erase(std::remove(added_nodes.begin(), added_nodes.end(), std::get<1>(edge)), added_nodes.end());
+                        break;
+                    }
+                }
+
+                }
+
+            }
+            else if (std::find(added_nodes.begin(), added_nodes.end(), std::get<1>(edge)) != added_nodes.end() &&
+                     std::find(added_nodes.begin(), added_nodes.end(), std::get<0>(edge)) == added_nodes.end())
+            {
+                
+                for (auto partition : X)
+                {
+                    if (partition->find_node(std::get<1>(edge)) != nullptr)
+                    {
+                        partition->add_node(std::get<0>(edge), nodes_weight[std::get<0>(edge)]);
+                        partition->add_edge(std::get<0>(edge), std::get<1>(edge), 1);
+                        added_nodes.push_back(std::get<0>(edge));
+                        break;
+                    }
+                }
+
+                int gap = compute_total_gap(X, nodes_weight);
+
+                if (gap < melhor_gap)
+                {
+                    melhor_gap   = gap;
+                }
+                else{
+
+                for (auto partition : X)
+                {
+                    if (partition->find_node(std::get<0>(edge)) != nullptr)
+                    {
+                        partition->remove_node(std::get<0>(edge));
+                        partition->remove_edge(std::get<0>(edge), std::get<1>(edge));
+                        added_nodes.erase(std::remove(added_nodes.begin(), added_nodes.end(), std::get<0>(edge)), added_nodes.end());
+                        break;
+                    }
+                }
+
+                }
+            }
+        }
+    }
+
+    return X;
+}
+
+
+
+
+int Graph ::compute_gap(std::map<int, int> partition_weights)
+{
+    int max_weight = 0;
+    int min_weight = std::numeric_limits<int>::max();
+
+    for (auto i : partition_weights)
+    {
+        if (i.second > max_weight)
+        {
+            max_weight = i.second;
+        }
+        if (i.second < min_weight)
+        {
+            min_weight = i.second;
+        }
+    }
+
+    return max_weight - min_weight;
+}
+
+int Graph :: compute_total_gap(std::vector<Graph*>& partitions, std::map<int, int>& node_weights)
+{
+    int total_gap = 0;
+    for (auto partition : partitions)
+    {
+        std::map<int, int> partition_weights;
+        std::vector<Node>  nodes = partition->get_nodes();
+        for (auto node : nodes)
+        {
+            partition_weights[node._id] = node._weight;
+        }
+
+        total_gap += partition->compute_gap(partition_weights);
+    }
+    return total_gap;
+}
+
+// end: Construção de Soluções
+
+std::vector<Node> Graph :: get_nodes()
+{
+    std::vector<Node> nodes;
+    for (Node *node = _first; node != nullptr; node = node->_next_node)
+    {
+        nodes.push_back(*node);
+    }
+    return nodes;
+}
+
+std::map<int, int> Graph :: get_partition_weights(Graph& partition){
+    std::map<int, int> partition_weights;
+    std::vector<Node> nodes = partition.get_nodes();
+    for (auto node : nodes)
+    {
+        partition_weights[node._id] = node._weight;
+    }
+    return partition_weights;
 }
