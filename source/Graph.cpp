@@ -1681,3 +1681,178 @@ std::vector<std::vector<int>> Graph::create_adjacency_list()
     std::cout << "Lista de adjacência criada" << std::endl;
     return adjList;
 }
+
+///algoritmo GRASP
+
+//Construção
+
+std::vector<std::tuple<int, int>> Graph::build_RCL(const std::vector<std::tuple<int, int>>& edges,
+                                            const std::map<int, float>& node_weights, float alpha)
+{
+    std::vector<std::tuple<int, int>> RCL;
+
+    if (edges.empty())
+        return RCL;
+
+    float min_gap = std::abs(node_weights.at(std::get<0>(edges.front())) - node_weights.at(std::get<1>(edges.front())));
+    float max_gap = std::abs(node_weights.at(std::get<0>(edges.back())) - node_weights.at(std::get<1>(edges.back())));
+
+    float threshold = min_gap + alpha * (max_gap - min_gap);
+
+    for (const auto& edge : edges)
+    {
+        float gap = std::abs(node_weights.at(std::get<0>(edge)) - node_weights.at(std::get<1>(edge)));
+        if (gap <= threshold)
+        {
+            RCL.push_back(edge);
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return RCL;
+}
+
+
+std::vector<std::tuple<int, int>> Graph::get_edges_ordered_by_gap(const std::map<int, float>& node_weights)
+{
+    std::vector<std::tuple<int, int>> edges;
+
+    for (Node* node = this->_first; node != nullptr; node = node->_next_node)
+    {
+        Edge* edge = node->_first_edge;
+        while (edge != nullptr)
+        {
+            int u = node->_id;
+            int v = edge->_target_id;
+
+            if (!_directed && u > v)
+            {
+                edge = edge->_next_edge;
+                continue;
+            }
+
+            edges.push_back({u, v});
+            edge = edge->_next_edge;
+        }
+    }
+
+    // Ordenar as arestas em ordem crescente de gap | w(u) - w(v) |
+    std::sort(edges.begin(), edges.end(), [&](const std::tuple<int, int>& a, const std::tuple<int, int>& b) {
+        float gap_a = std::abs(node_weights.at(std::get<0>(a)) - node_weights.at(std::get<1>(a)));
+        float gap_b = std::abs(node_weights.at(std::get<0>(b)) - node_weights.at(std::get<1>(b)));
+        return gap_a < gap_b;
+    });
+
+    return edges;
+}
+
+int Graph::select_random_unassigned_node(const std::vector<int>& nodes,
+                                        const std::unordered_set<int>& added_nodes)
+{
+    std::vector<int> unassigned_nodes;
+
+    for (int node_id : nodes)
+    {
+        if (added_nodes.find(node_id) == added_nodes.end())
+        {
+            unassigned_nodes.push_back(node_id);
+        }
+    }
+
+    if (unassigned_nodes.empty())
+    {
+        return -1;
+    }
+
+    int random_index = rand() % unassigned_nodes.size();
+    return unassigned_nodes[random_index];
+}
+
+
+
+std::vector<std::vector<int>> Graph::constructive_phase(const std::vector<int>& nodes,
+                                    const std::map<int, float>& node_weights, int p, float alpha)
+{
+    std::vector<std::vector<int>> partitions(p); // Inicializa 'p' partições vazias
+    std::unordered_set<int> added_nodes;
+
+    // Obter as arestas ordenadas por gap crescente
+    std::vector<std::tuple<int, int>> edges = get_edges_ordered_by_gap(node_weights);
+
+    // Enquanto houver nós não adicionados
+    while (added_nodes.size() < nodes.size())
+    {
+        // Construir a RCL
+        std::vector<std::tuple<int, int>> RCL = build_RCL(edges, node_weights, alpha);
+
+        // Selecionar aleatoriamente uma aresta da RCL
+        if (RCL.empty())
+        {
+            // Adicionar um nó não atribuído a uma partição aleatória
+            int node_id = select_random_unassigned_node(nodes, added_nodes);
+            int partition_index = rand() % p;
+            partitions[partition_index].push_back(node_id);
+            added_nodes.insert(node_id);
+            continue;
+        }
+
+        auto edge = RCL[rand() % RCL.size()];
+        int u = std::get<0>(edge);
+        int v = std::get<1>(edge);
+
+        // Determinar em qual partição adicionar os nós
+        // Implementação da lógica para adicionar os nós às partições garantindo as restrições
+        // ...
+
+        // Após modificar 'partitions', se precisar avaliar o gap:
+        // double total_gap = compute_total_gap(partitions, node_weights);
+        // Use 'total_gap' conforme necessário
+    }
+
+    return partitions;
+}
+
+
+//GRASP fauxs
+
+
+
+
+
+
+
+double Graph::compute_total_gap(const std::vector<std::vector<int>>& partitions,
+                                const std::map<int, float>& node_weights)
+{
+    double total_gap = 0.0;
+
+    for (const auto& partition : partitions)
+    {
+        if (partition.size() >= 2)
+        {
+            auto minmax = std::minmax_element(
+                partition.begin(),
+                partition.end(),
+                [&](int a, int b) {
+                    return node_weights.at(a) < node_weights.at(b);
+                });
+
+            float min_weight = node_weights.at(*minmax.first);
+            float max_weight = node_weights.at(*minmax.second);
+
+            total_gap += (max_weight - min_weight);
+        }
+        else
+        {
+            // Penalizar partições com menos de dois nós
+            total_gap += std::numeric_limits<float>::max();
+        }
+    }
+
+    return total_gap;
+}
+
+

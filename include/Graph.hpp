@@ -74,6 +74,9 @@ private:
                                                     std::vector<std::tuple<size_t, size_t, float>> *arestas_retorno = nullptr);
     std::vector<std::vector<float>> create_matrix();
     std::vector<std::vector<float>> create_path_matrix();
+    
+    //GULOSO
+
     //Procedimento Construtivo
     std::vector<Graph*> constructive_procedure(int p);
     std::vector<std::tuple<int, int>> get_crescent_gap_edges(std::vector<int>& nodes, std::map<int, int>&nodes_weight );
@@ -81,7 +84,7 @@ private:
     std::map<int, int> get_partition_weights(Graph& partition);
 
 
-
+    //Tabu Search Process
     void initialize_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, int numVertices, int numSubgraphs);
     bool is_articulation_vertex(int v, const std::vector<int>& subgraph, const std::vector<std::vector<int>>& adjList);
     std::vector<std::tuple<int, int, int>> generate_neighborhood(const std::vector<std::vector<int>>& adjList,
@@ -94,8 +97,20 @@ private:
     double compute_total_gap(const std::vector<std::vector<int>>& solution, const std::vector<int>& vertexWeights);
     void update_tabu_matrix(std::map<int, std::map<int, int>>& tabuMatrix, const std::tuple<int, int, int>& move,
                         int iteration);
-    
 
+    //GRASP
+
+    //Processo Construtivo
+    std::vector<std::vector<int>> constructive_phase(const std::vector<int>& nodes,
+    const std::map<int, float>& node_weights, int p, float alpha);
+    double compute_total_gap(const std::vector<std::vector<int>>& partitions,
+                                const std::map<int, float>& node_weights);
+    std::vector<std::tuple<int, int>> get_edges_ordered_by_gap(const std::map<int, float>& node_weights);
+    std::vector<std::tuple<int, int>> build_RCL(const std::vector<std::tuple<int, int>>& edges,
+                                    const std::map<int, float>& node_weights, float alpha);
+    int select_random_unassigned_node (const std::vector<int>& nodes,
+                                        const std::unordered_set<int>& added_nodes);
+    
 };
 
 #endif  //GRAPH_HPP
