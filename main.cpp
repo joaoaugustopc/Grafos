@@ -43,6 +43,7 @@ int print_menu()
     print_line('+', '-', width);
     print_centered_text("1. Algoritmo Guloso;", width);
     print_centered_text("2. Grasp;", width);
+    print_centered_text("3. Reativo;", width);
     print_line('+', '-', width);
     print_centered_text("Escolha uma opcao (1-2)", width);
     print_centered_text("opcao (0) para sair", width);
@@ -153,6 +154,14 @@ int main(int argc, char *argv[])
             case 2:
                 time(&start);
                 solution = graph->grasp(1000, 0.5);
+                time(&end);
+                tempoexec = difftime(end, start);
+                std::cout << std::fixed << std::setprecision(2) << "Tempo de execucao: " << tempoexec << std::endl;
+
+                break;
+            case 3:
+                time(&start);
+                solution = graph->reativo(1000, 0.5);
                 time(&end);
                 tempoexec = difftime(end, start);
                 std::cout << std::fixed << std::setprecision(2) << "Tempo de execucao: " << tempoexec << std::endl;

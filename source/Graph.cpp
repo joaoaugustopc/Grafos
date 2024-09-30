@@ -1732,6 +1732,65 @@ double Graph::compute_total_gap(const std::vector<std::vector<int>>& partitions,
 }
 */
 
+std::vector<std::vector<int>> Graph::reativo(int max_iter, float alpha)
+{
+    int p = this->_number_of_components;
+    std::vector<int> nodes;
+    std::map<int, float> node_weights;
+
+    // Coletar os nós e seus pesos
+    for (Node* node = this->_first; node != nullptr; node = node->_next_node)
+    {
+        nodes.push_back(node->_id);
+        node_weights[node->_id] = node->_weight;
+    }
+
+    std::vector<std::vector<int>> best_solution;
+    double best_gap = std::numeric_limits<double>::max();
+
+    for (int iter = 0; iter < max_iter; ++iter)
+    {
+        std::cout << "Iteracao " << iter << std::endl;
+        // Fase de Construção
+        std::vector<std::vector<int>> solution = constructive_phase(nodes, node_weights, p, alpha);
+        std::cout << "teste1" << std::endl;
+
+        // Fase de Busca Local
+        local_search(solution, node_weights);
+        std::cout << "teste2" << std::endl;
+
+        // Avaliar a solução
+        double total_gap = compute_total_gap_GRASP(solution, node_weights);
+        std::cout << "teste3" << std::endl;
+
+        if (total_gap < best_gap)
+        {
+            best_gap = total_gap;
+            best_solution = solution;
+        }
+    }
+
+    int total_gap = compute_total_gap_GRASP(best_solution, node_weights);
+        std::cout << "teste4" << std::endl;
+
+
+    std::cout << "Melhor solução encontrada: " << std::endl;
+    for (int i = 0; i < best_solution.size(); ++i)
+    {
+        std::cout << "Subgrafo " << i + 1 << ": ";
+        for (int v : best_solution[i])
+        {
+            std::cout << v << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "Gap total: " << total_gap << std::endl;
+
+
+    return best_solution;
+}
+
 
 std::vector<std::vector<int>> Graph::create_adjacency_list()
 {
