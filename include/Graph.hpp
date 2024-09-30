@@ -42,7 +42,7 @@ public:
     std::vector<Node> get_nodes();
 
     void new_read(std::ifstream& instance);
-    void mggp(int p);
+    void mggp();
     int compute_gap(std::map<int, int> partition_weights);
     bool is_tabu(const std::tuple<int, int, int>& move, const std::map<int, std::map<int, int>>& tabuMatrix,
                 int iteration,int l_in);
@@ -50,6 +50,7 @@ public:
                                           const std::vector<std::vector<int>>& initial_partition, int max_iter, int l_min, int l_max);
     
     std::vector<std::vector<int>> create_adjacency_list();
+    std::vector<std::vector<int>> grasp(int max_iter, float alpha);
 
 private:
     size_t _number_of_nodes;
@@ -59,6 +60,7 @@ private:
     bool   _weighted_nodes;
     Node  *_first;
     Node  *_last;
+    int   _number_of_components;
     void   DFS(Node *node, size_t node_id, size_t parent, std::map<size_t, bool>& visited, std::ofstream& output_file,
                std::set<std::pair<size_t, size_t>>& printed_return_edges, std::vector<std::tuple<size_t, size_t, float>>& arv,
                std::vector<std::tuple<size_t, size_t, float>>& retorno);
@@ -102,7 +104,7 @@ private:
 
     //Processo Construtivo
     std::vector<std::vector<int>> constructive_phase(const std::vector<int>& nodes,
-    const std::map<int, float>& node_weights, int p, float alpha);
+                                    const std::map<int, float>& node_weights, int p, float alpha);
     double compute_total_gap_GRASP(const std::vector<std::vector<int>>& partitions,
                                 const std::map<int, float>& node_weights);
     std::vector<std::tuple<int, int>> get_edges_ordered_by_gap(const std::map<int, float>& node_weights);
@@ -117,9 +119,9 @@ private:
     bool can_remove_node(const std::vector<int>& partition, int node_id);
     bool can_add_node(const std::vector<int>& partition, int node_id);
     void local_search(std::vector<std::vector<int>>& partitions, const std::map<int, float>& node_weights);
+    double compute_partition_gap(const std::vector<int>& partition, const std::map<int, float>& node_weights);
 
     ///GRASP de fato
-    std::vector<std::vector<int>> grasp(int p, int max_iter, float alpha);
     
 };
 

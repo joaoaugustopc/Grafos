@@ -1,4 +1,4 @@
-#include "source/Graph.cpp"
+#include "include/Graph.hpp"
 
 void clear_screen()
 {
@@ -41,6 +41,27 @@ int print_menu()
     print_line('+', '-', width);
     print_centered_text("MENU", width);
     print_line('+', '-', width);
+    print_centered_text("1. Algoritmo Guloso;", width);
+    print_centered_text("2. Grasp;", width);
+    print_line('+', '-', width);
+    print_centered_text("Escolha uma opcao (1-2)", width);
+    print_centered_text("opcao (0) para sair", width);
+    print_line('+', '-', width);
+    std::cout << "> Digite a opcao desejada: ";
+    int op;
+    std::cin >> op;
+
+    return op;
+}
+
+/*
+int print_menu()
+{
+    const int width = 108;  // Largura do menu
+
+    print_line('+', '-', width);
+    print_centered_text("MENU", width);
+    print_line('+', '-', width);
     print_centered_text("1. Adicionar vertice;", width);
     print_centered_text("2. Adicionar aresta;", width);
     print_centered_text("3. Remover vertice;", width);
@@ -65,6 +86,7 @@ int print_menu()
 
     return op;
 }
+*/
 
 void saveGraphToFile(Graph *graph, const std::string& filename)
 {
@@ -107,11 +129,45 @@ int main(int argc, char *argv[])
     std::cout << "Grafo carregado com sucesso" << std::endl;
 
     time_t start, end;
-    time(&start);
-    graph->mggp(10);
-    time(&end);
-    double tempoexec = difftime(end, start);
-    std::cout << std::fixed << std::setprecision(2) << "Tempo de execucao: " << tempoexec << std::endl;
+    double tempoexec;
+    std::vector<std::vector<int>> solution;
+
+    int choice;
+
+    do
+    {
+        choice = print_menu();
+        switch (choice)
+        {
+            case 0:
+                break;
+            case 1:
+                time(&start);
+                graph->mggp();
+                time(&end);
+                tempoexec = difftime(end, start);
+                std::cout << std::fixed << std::setprecision(2) << "Tempo de execucao: " << tempoexec << std::endl;
+
+                break;
+
+            case 2:
+                time(&start);
+                solution = graph->grasp(1000, 0.5);
+                time(&end);
+                tempoexec = difftime(end, start);
+                std::cout << std::fixed << std::setprecision(2) << "Tempo de execucao: " << tempoexec << std::endl;
+
+                break;
+            default:
+                std::cout << "Opcao invalida" << std::endl;
+                break;
+        }
+
+        std::cout << "Pressione enter para continuar..." << std::endl;
+        std::cout << "> ";
+        std::cin.ignore();
+        std::cin.get();
+    } while (choice != 0);
 
     /*
     int                 choice;

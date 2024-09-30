@@ -99,6 +99,8 @@ Graph::Graph(std::ifstream& instance, bool directed, bool weighted_edges, bool w
         this->add_edge(i.first, i.second, 1);
     }
 
+    this->_number_of_components = p;
+
     /*
     size_t node_id_1, node_id_2;
     float  edge_weight;
@@ -1319,8 +1321,10 @@ std::vector<std::vector<int>> Graph ::tabu_search(const std::vector<std::vector<
     return best_solution;
 }
 
-void Graph ::mggp(int p)
+void Graph ::mggp()
 {
+
+    int p = this->_number_of_components;
     std::cout << "Executando o algoritmo MGGP com p = " << p << std::endl;
 
     std::vector<Graph *> solution = constructive_procedure(p);
@@ -1844,17 +1848,21 @@ std::vector<std::vector<int>> Graph::constructive_phase(const std::vector<int>& 
 
     std::vector<std::tuple<int, int>> edges = get_edges_ordered_by_gap(node_weights);
 
+    //std::cout <<"Teste antes while - constructive_phase" << std::endl;
+    
     // Enquanto houver nós não adicionados
     while (added_nodes.size() < nodes.size())
     {
+    //std::cout <<"Teste while - constructive_phase" << std::endl;
         // Construir a RCL
         std::vector<std::tuple<int, int>> RCL = build_RCL(edges, node_weights, alpha);
 
         // Selecionar aleatoriamente uma aresta da RCL
-        if (RCL.empty())
+        if (!RCL.empty())
         {
             // Adicionar um nó não atribuído a uma partição aleatória
             int node_id = select_random_unassigned_node(nodes, added_nodes);
+            //std::cout <<"Dentro IF - constructive_phase" << std::endl;    
             int partition_index = rand() % p;
             partitions[partition_index].push_back(node_id);
             added_nodes.insert(node_id);
@@ -2043,8 +2051,9 @@ void Graph::local_search(std::vector<std::vector<int>>& partitions, const std::m
 }
 
 ///Finalmente GRASP!!
-std::vector<std::vector<int>> Graph::grasp(int p, int max_iter, float alpha)
+std::vector<std::vector<int>> Graph::grasp(int max_iter, float alpha)
 {
+    int p = this->_number_of_components;
     std::vector<int> nodes;
     std::map<int, float> node_weights;
 
@@ -2060,14 +2069,18 @@ std::vector<std::vector<int>> Graph::grasp(int p, int max_iter, float alpha)
 
     for (int iter = 0; iter < max_iter; ++iter)
     {
+        std::cout << "Iteracao " << iter << std::endl;
         // Fase de Construção
         std::vector<std::vector<int>> solution = constructive_phase(nodes, node_weights, p, alpha);
+        std::cout << "teste1" << std::endl;
 
         // Fase de Busca Local
         local_search(solution, node_weights);
+        std::cout << "teste2" << std::endl;
 
         // Avaliar a solução
         double total_gap = compute_total_gap_GRASP(solution, node_weights);
+        std::cout << "teste3" << std::endl;
 
         if (total_gap < best_gap)
         {
@@ -2075,6 +2088,24 @@ std::vector<std::vector<int>> Graph::grasp(int p, int max_iter, float alpha)
             best_solution = solution;
         }
     }
+
+    int total_gap = compute_total_gap_GRASP(best_solution, node_weights);
+        std::cout << "teste4" << std::endl;
+
+
+    std::cout << "Melhor solução encontrada: " << std::endl;
+    for (int i = 0; i < best_solution.size(); ++i)
+    {
+        std::cout << "Subgrafo " << i + 1 << ": ";
+        for (int v : best_solution[i])
+        {
+            std::cout << v << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "Gap total: " << total_gap << std::endl;
+
 
     return best_solution;
 }
