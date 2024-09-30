@@ -1183,7 +1183,6 @@ void Graph ::evaluate_moves(const std::vector<std::tuple<int, int, int>>& neighb
                             std::tuple<int, int, int>& best_move, double& best_gap, const std::vector<int>& vertexWeights)
 {
     double aspiration_value = compute_total_gap(best_solution, vertexWeights);
-
     for (const auto& move : neighborhood_moves)
     {
         int v      = std::get<0>(move);
@@ -1324,7 +1323,6 @@ void Graph ::mggp(int p)
 {
     std::cout << "Executando o algoritmo MGGP com p = " << p << std::endl;
 
-    // Correção na declaração de 'solution'
     std::vector<Graph *> solution = constructive_procedure(p);
 
     for (Graph *partition : solution)
@@ -1340,7 +1338,6 @@ void Graph ::mggp(int p)
     std::vector<int> vertexWeights(this->_number_of_nodes + 1, 0);
     std::cout << "1" << std::endl;
 
-    // Correção na iteração dos nós
     for (Node *node = this->_first; node != nullptr; node = node->_next_node)
     {
         vertexWeights[node->_id] = node->_weight;
@@ -1350,7 +1347,6 @@ void Graph ::mggp(int p)
 
     std::cout << "2" << std::endl;
 
-    // Correção no loop sobre 'solution'
     for (Graph *partition : solution)
     {
         std::vector<int> subgraph;
@@ -1388,64 +1384,10 @@ void Graph ::mggp(int p)
 
     std::cout << "Gap total: " << compute_total_gap(best_solution, vertexWeights) << std::endl;
 
-    // Deletar partições alocadas
     for (Graph *partition : solution)
     {
         delete partition;
     }
-    /*
-    /*
-    std::cout << "Executando o algoritmo MGGP com p = " << p << std::endl;
-    std::vector<Graph*> solution = constructive_procedure(p);
-    std::vector<int>     vertexWeights(this->_number_of_nodes, 0);
-    std::cout << "1" << std::endl;
-    for (Node* node = this->_first; node != nullptr; node = node->_next_node)
-    {
-        vertexWeights[node->_id] = node->_weight;
-    }
-
-    std::vector<std::vector<int>> initial_partition;
-
-    std::cout << "2" << std::endl;
-    
-    for (auto partition : solution)
-    {
-        std::cout << "2.1" << std::endl;
-        std::vector<int> subgraph;
-        for (Node* node = partition->_first; node != nullptr; node = node->_next_node)
-        {
-            subgraph.push_back(node->_id);
-        }
-        initial_partition.push_back(subgraph);
-    }
-
-    std::cout << "3" << std::endl;
-    std::vector<std::vector<int>> adjList = create_adjacency_list();
-
-    std::cout << "4" << std::endl;
-
-    std::vector<std::vector<int>> best_solution = tabu_search(adjList, vertexWeights, initial_partition, 1000, 5, 10);
-
-    std::cout << "Solução final encontrada" << std::endl;   
-
-    std::cout << "Melhor solução encontrada: " << std::endl;
-    for (int i = 0; i < best_solution.size(); ++i)
-    {
-        std::cout << "Subgrafo " << i + 1 << ": ";
-        for (int v : best_solution[i])
-        {
-            std::cout << v << " ";
-        }
-        std::cout << std::endl;
-    }
-
-    std::cout << "Gap total: " << compute_total_gap(best_solution, vertexWeights) << std::endl;
-
-    for (Graph* partition : solution)
-    {
-        delete partition;
-    }
-    */
 }
 
 // begin: Construção de Soluções
@@ -1470,7 +1412,7 @@ std::vector<std::tuple<int, int>> Graph ::get_crescent_gap_edges(std::vector<int
             if (u > v)
                 std::swap(u, v);
 
-            // Verifique se essa aresta já foi inserida
+            // Verificar se essa aresta já foi inserida
             if (seen_edges.find({ u, v }) == seen_edges.end())
             {
                 edges.push_back({ u, v });
@@ -1663,7 +1605,7 @@ std::map<int, int> Graph ::get_partition_weights(Graph& partition)
     }
     return partition_weights;
 }
-
+/*
 double Graph::compute_total_gap(const std::vector<std::vector<int>>& partitions, const std::map<int, float>& node_weights)
 {
     double total_gap = 0.0;
@@ -1692,9 +1634,9 @@ double Graph::compute_total_gap(const std::vector<std::vector<int>>& partitions,
     }
 
     return total_gap;
-}
+}*/
 
-bool Graph::is_connected_subgraph(const std::vector<int>& subgraph_nodes)
+/*bool Graph::is_connected_subgraph(const std::vector<int>& subgraph_nodes)
 {
     if (subgraph_nodes.size() < 2)
         return false;
@@ -1729,9 +1671,9 @@ bool Graph::is_connected_subgraph(const std::vector<int>& subgraph_nodes)
     }
 
     return visited.size() == subgraph_nodes.size();
-}
+}*/
 
-void Graph::local_search(std::vector<std::vector<int>>& partitions, const std::map<int, float>& node_weights)
+/*void Graph::local_search(std::vector<std::vector<int>>& partitions, const std::map<int, float>& node_weights)
 {
     bool improved = true;
 
@@ -1756,13 +1698,13 @@ void Graph::local_search(std::vector<std::vector<int>>& partitions, const std::m
                         if (can_add_node(partitions[j], node_id))
                         {
                             // Calcular o gap atual e o novo gap se a mudança for feita
-                            double current_gap = compute_total_gap(partitions, node_weights);
+                            double current_gap = compute_total_gap_GRASP(partitions, node_weights);
 
                             // Realizar a mudança
                             partitions[i].erase(std::remove(partitions[i].begin(), partitions[i].end(), node_id), partitions[i].end());
                             partitions[j].push_back(node_id);
 
-                            double new_gap = compute_total_gap(partitions, node_weights);
+                            double new_gap = compute_total_gap_GRASP(partitions, node_weights);
 
                             if (new_gap < current_gap)
                             {
@@ -1784,7 +1726,7 @@ void Graph::local_search(std::vector<std::vector<int>>& partitions, const std::m
         }
     }
 }
-
+*/
 
 
 std::vector<std::vector<int>> Graph::create_adjacency_list()
@@ -1894,15 +1836,12 @@ int Graph::select_random_unassigned_node(const std::vector<int>& nodes,
     return unassigned_nodes[random_index];
 }
 
-
-
 std::vector<std::vector<int>> Graph::constructive_phase(const std::vector<int>& nodes,
                                     const std::map<int, float>& node_weights, int p, float alpha)
 {
     std::vector<std::vector<int>> partitions(p); // Inicializa 'p' partições vazias
     std::unordered_set<int> added_nodes;
 
-    // Obter as arestas ordenadas por gap crescente
     std::vector<std::tuple<int, int>> edges = get_edges_ordered_by_gap(node_weights);
 
     // Enquanto houver nós não adicionados
@@ -1931,7 +1870,7 @@ std::vector<std::vector<int>> Graph::constructive_phase(const std::vector<int>& 
         // ...
 
         // Após modificar 'partitions', se precisar avaliar o gap:
-        // double total_gap = compute_total_gap(partitions, node_weights);
+        // double total_gap = compute_total_gap_GRASP(partitions, node_weights);
         // Use 'total_gap' conforme necessário
     }
 
@@ -1941,13 +1880,73 @@ std::vector<std::vector<int>> Graph::constructive_phase(const std::vector<int>& 
 
 //GRASP fauxs
 
+bool Graph::is_connected_subgraph(const std::vector<int>& subgraph_nodes)
+{
+    if (subgraph_nodes.size() < 2)
+        return false;
+
+    std::unordered_set<int> visited;
+    std::queue<int> q;
+
+    int start_node = subgraph_nodes[0];
+    q.push(start_node);
+    visited.insert(start_node);
+
+    // Converta o vetor de nós em um conjunto para acesso rápido
+    std::unordered_set<int> node_set(subgraph_nodes.begin(), subgraph_nodes.end());
+
+    while (!q.empty())
+    {
+        int current = q.front();
+        q.pop();
+
+        Node* node = find_node(current);
+        Edge* edge = node->_first_edge;
+
+        while (edge != nullptr)
+        {
+            int neighbor_id = edge->_target_id;
+
+            // Verificar se o vizinho está no subgrafo
+            if (node_set.find(neighbor_id) != node_set.end())
+            {
+                // Se o vizinho ainda não foi visitado
+                if (visited.find(neighbor_id) == visited.end())
+                {
+                    visited.insert(neighbor_id);
+                    q.push(neighbor_id);
+                }
+            }
+
+            edge = edge->_next_edge;
+        }
+    }
+
+    // O subgrafo é conectado se todos os nós foram visitados
+    return visited.size() == subgraph_nodes.size();
+}
 
 
+bool Graph::can_remove_node(const std::vector<int>& partition, int node_id)
+{
+    if (partition.size() <= 2)
+        return false;
 
+    std::vector<int> subgraph_nodes = partition;
+    subgraph_nodes.erase(std::remove(subgraph_nodes.begin(), subgraph_nodes.end(), node_id), subgraph_nodes.end());
 
+    return is_connected_subgraph(subgraph_nodes);
+}
 
+bool Graph::can_add_node(const std::vector<int>& partition, int node_id)
+{
+    std::vector<int> subgraph_nodes = partition;
+    subgraph_nodes.push_back(node_id);
 
-double Graph::compute_total_gap(const std::vector<std::vector<int>>& partitions,
+    return is_connected_subgraph(subgraph_nodes);
+}
+
+double Graph::compute_total_gap_GRASP(const std::vector<std::vector<int>>& partitions,
                                 const std::map<int, float>& node_weights)
 {
     double total_gap = 0.0;
@@ -1977,5 +1976,108 @@ double Graph::compute_total_gap(const std::vector<std::vector<int>>& partitions,
 
     return total_gap;
 }
+
+void Graph::local_search(std::vector<std::vector<int>>& partitions, const std::map<int, float>& node_weights)
+{
+    bool improved = true;
+
+    while (improved)
+    {
+        improved = false;
+
+        // Para cada partição
+        for (size_t i = 0; i < partitions.size(); ++i)
+        {
+            // Para cada nó na partição i
+            for (size_t k = 0; k < partitions[i].size(); ++k)
+            {
+                int node_id = partitions[i][k];
+
+                // Verificar se a partição i permanece válida após a remoção do nó
+                if (can_remove_node(partitions[i], node_id))
+                {
+                    // Tentar mover o nó para cada uma das outras partições
+                    for (size_t j = 0; j < partitions.size(); ++j)
+                    {
+                        if (i == j) continue;
+
+                        // Verificar se é possível adicionar o nó à partição j
+                        if (can_add_node(partitions[j], node_id))
+                        {
+                            // Salvar o estado atual das partições
+                            auto original_partitions = partitions;
+
+                            // Realizar a movimentação do nó
+                            partitions[i].erase(partitions[i].begin() + k);
+                            partitions[j].push_back(node_id);
+
+                            // Calcular o gap após a movimentação
+                            double new_gap = compute_total_gap_GRASP(partitions, node_weights);
+
+                            // Calcular o gap antes da movimentação
+                            double current_gap = compute_total_gap_GRASP(original_partitions, node_weights);
+
+                            // Verificar se houve melhoria
+                            if (new_gap < current_gap)
+                            {
+                                improved = true;
+                                break; // Saia do loop das partições j
+                            }
+                            else
+                            {
+                                // Reverter a movimentação
+                                partitions = original_partitions;
+                            }
+                        }
+                    }
+
+                    if (improved)
+                        break; // Saia do loop dos nós k
+                }
+            }
+
+            if (improved)
+                break; // Saia do loop das partições i
+        }
+    }
+}
+
+///Finalmente GRASP!!
+std::vector<std::vector<int>> Graph::grasp(int p, int max_iter, float alpha)
+{
+    std::vector<int> nodes;
+    std::map<int, float> node_weights;
+
+    // Coletar os nós e seus pesos
+    for (Node* node = this->_first; node != nullptr; node = node->_next_node)
+    {
+        nodes.push_back(node->_id);
+        node_weights[node->_id] = node->_weight;
+    }
+
+    std::vector<std::vector<int>> best_solution;
+    double best_gap = std::numeric_limits<double>::max();
+
+    for (int iter = 0; iter < max_iter; ++iter)
+    {
+        // Fase de Construção
+        std::vector<std::vector<int>> solution = constructive_phase(nodes, node_weights, p, alpha);
+
+        // Fase de Busca Local
+        local_search(solution, node_weights);
+
+        // Avaliar a solução
+        double total_gap = compute_total_gap_GRASP(solution, node_weights);
+
+        if (total_gap < best_gap)
+        {
+            best_gap = total_gap;
+            best_solution = solution;
+        }
+    }
+
+    return best_solution;
+}
+
 
 

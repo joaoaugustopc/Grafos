@@ -103,13 +103,23 @@ private:
     //Processo Construtivo
     std::vector<std::vector<int>> constructive_phase(const std::vector<int>& nodes,
     const std::map<int, float>& node_weights, int p, float alpha);
-    double compute_total_gap(const std::vector<std::vector<int>>& partitions,
+    double compute_total_gap_GRASP(const std::vector<std::vector<int>>& partitions,
                                 const std::map<int, float>& node_weights);
     std::vector<std::tuple<int, int>> get_edges_ordered_by_gap(const std::map<int, float>& node_weights);
     std::vector<std::tuple<int, int>> build_RCL(const std::vector<std::tuple<int, int>>& edges,
                                     const std::map<int, float>& node_weights, float alpha);
     int select_random_unassigned_node (const std::vector<int>& nodes,
                                         const std::unordered_set<int>& added_nodes);
+
+    //GRASP fauxs
+    
+    bool is_connected_subgraph(const std::vector<int>& subgraph_nodes);
+    bool can_remove_node(const std::vector<int>& partition, int node_id);
+    bool can_add_node(const std::vector<int>& partition, int node_id);
+    void local_search(std::vector<std::vector<int>>& partitions, const std::map<int, float>& node_weights);
+
+    ///GRASP de fato
+    std::vector<std::vector<int>> grasp(int p, int max_iter, float alpha);
     
 };
 

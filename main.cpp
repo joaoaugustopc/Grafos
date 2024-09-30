@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
     time_t start, end;
     time(&start);
-    graph->mggp(14);
+    graph->mggp(10);
     time(&end);
     double tempoexec = difftime(end, start);
     std::cout << std::fixed << std::setprecision(2) << "Tempo de execucao: " << tempoexec << std::endl;
